@@ -152,6 +152,9 @@ public class OxidiziumLib {
     public static native long ceil_long(double value);
 
     @Link
+    public static native int pack_rgb(float r, float g, float b);
+
+    @Link
     public static native float fractional_part_float(float value);
 
     @Link
@@ -174,6 +177,9 @@ public class OxidiziumLib {
 
     @Link
     public static native double inverse_sqrt_double(double x);
+
+    @Link
+    public static native double fast_inverse_sqrt(double x);
 
     @Link
     public static native float fast_inverse_cbrt(float x);

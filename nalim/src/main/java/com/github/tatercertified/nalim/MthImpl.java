@@ -235,6 +235,11 @@ public class MthImpl implements Mth {
     }
 
     @Override
+    public int packRgb(float r, float g, float b) {
+        return OxidiziumLib.pack_rgb(r, g, b);
+    }
+
+    @Override
     public long ceilLong(double value) {
         return OxidiziumLib.ceil_long(value);
     }
@@ -277,6 +282,11 @@ public class MthImpl implements Mth {
     @Override
     public double inverseSqrt(double x) {
         return OxidiziumLib.inverse_sqrt_double(x);
+    }
+
+    @Override
+    public double fastInverseSqrt(double x) {
+        return OxidiziumLib.fast_inverse_sqrt(x);
     }
 
     @Override

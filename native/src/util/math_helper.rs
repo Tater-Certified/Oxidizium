@@ -484,6 +484,12 @@ pub extern "C" fn floor_log_2(value: i32) -> i32 {
     ceil_log_2(value) - if is_power_of_two(value) { 0 } else { 1 }
 }
 
+/// Compresses an RGB value into a single int
+#[no_mangle]
+pub extern "C" fn pack_rgb(red: f32, green: f32, blue: f32) -> u32 {
+    (((red * 255.0_f32) as u32) << 16) | (((green * 255.0_f32) as u32) << 8) | (blue * 255.0_f32) as u32
+}
+
 /// Gets the fractional part of a float
 #[no_mangle]
 pub extern "C" fn fractional_part_float(value: f32) -> f32 {
@@ -584,7 +590,9 @@ pub extern "C" fn inverse_sqrt_double(x: f64) -> f64 {
     1.0 / x.sqrt()
 }
 
-pub fn fast_inverse_sqrt(mut x: f64) -> f64 {
+/// Approximation of 1 / sqrt(x)
+#[no_mangle]
+pub extern "C" fn fast_inverse_sqrt(mut x: f64) -> f64 {
     let d: f64 = 0.5_f64 * x;
     let mut l: u64 = x.to_bits();
     l = INVERSE_SQRT - (l >> 1);

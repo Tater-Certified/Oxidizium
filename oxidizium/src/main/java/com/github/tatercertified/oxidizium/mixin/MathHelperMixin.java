@@ -501,6 +501,16 @@ public class MathHelperMixin {
     /**
      * @author QPCrummer
      * @reason Implement in Rust
+     */
+    @IfMinecraftVersion(maxVersion = "1.21.1")
+    @Overwrite
+    public static int packRgb(float r, float g, float b) {
+        return MTH.packRgb(r, g, b);
+    }
+
+    /**
+     * @author QPCrummer
+     * @reason Implement in Rust
      * Mojang, if you are reading this, learn how to get the fractional part.
      * Negative values should return negative fractional parts!!!
      */
@@ -581,6 +591,16 @@ public class MathHelperMixin {
     @Overwrite
     public static double inverseSqrt(@Bounded(minInclusive = 1, maxExclusive = 100) double x) {
         return MTH.inverseSqrt(x);
+    }
+
+    /**
+     * @author QPCrummer
+     * @reason Implement in Rust
+     */
+    @Deprecated
+    @Overwrite
+    public static double fastInverseSqrt(double x) {
+        return MTH.fastInverseSqrt(x);
     }
 
     /**

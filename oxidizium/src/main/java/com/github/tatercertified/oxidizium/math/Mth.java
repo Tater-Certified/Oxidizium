@@ -49,6 +49,7 @@ public interface Mth {
     boolean isPowerOfTwo(int value);
     int ceilLog2(int value);
     int floorLog2(int value);
+    int packRgb(float r, float g, float b);
     long ceilLong(double value);
     float fractionalPart(float value);
     double fractionalPart(double value);
@@ -58,6 +59,7 @@ public interface Mth {
     double atan2(double y, double x);
     float inverseSqrt(@Bounded(minInclusive = 1, maxExclusive = 100) float x);
     double inverseSqrt(@Bounded(minInclusive = 1, maxExclusive = 100) double x);
+    double fastInverseSqrt(double x);
     float fastInverseCbrt(float x);
     int hsvToRgb(@PositiveOnly float hue, @PositiveOnly float saturation, @PositiveOnly float value);
     int hsvToArgb(@PositiveOnly float hue, @PositiveOnly float saturation, @PositiveOnly float value, @PositiveOnly int alpha);
