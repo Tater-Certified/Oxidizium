@@ -923,6 +923,7 @@ public class MathHelperMixin {
      * @reason Implement in Rust
      */
     // @Config(name = "squared hypot")
+    @IfMinecraftVersion(minVersion = "1.18.2")
     @Overwrite
     public static double squaredHypot(double a, double b) {
         return MTH.squaredHypot(a, b);
@@ -954,6 +955,7 @@ public class MathHelperMixin {
      * @reason Implement in Rust
      */
     // @Config(name = "squared mag")
+    @IfMinecraftVersion(minVersion = "1.18.2")
     @Overwrite
     public static double squaredMagnitude(double a, double b, double c) {
         return MTH.squaredMagnitude(a, b, c);
