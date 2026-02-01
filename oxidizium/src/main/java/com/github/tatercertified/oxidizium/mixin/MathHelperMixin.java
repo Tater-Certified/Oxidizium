@@ -487,6 +487,7 @@ public class MathHelperMixin {
      * @reason Implement in Rust
      */
     // @Config(name = "floor log 2")
+    @IfMinecraftVersion(minVersion = "1.18.1")
     @Overwrite
     public static int floorLog2(int value) {
         return MTH.floorLog2(value);
@@ -761,6 +762,7 @@ public class MathHelperMixin {
      * @reason Implement in Rust
      */
     // @Config(name = "perlin fade derive")
+    @IfMinecraftVersion(minVersion = "1.17")
     @Overwrite
     public static double perlinFadeDerivative(double value) {
         return MTH.perlinFadeDerivative(value);
@@ -813,6 +815,7 @@ public class MathHelperMixin {
      * @reason Implement in Rust
      */
     // @Config(name = "wrap")
+    @IfMinecraftVersion(minVersion = "1.17")
     @Overwrite
     public static float wrap(float value, float maxDeviation) {
         return MTH.wrap(value, maxDeviation);
@@ -833,6 +836,7 @@ public class MathHelperMixin {
      * @reason Implement in Rust
      */
     // @Config(name = "double square")
+    @IfMinecraftVersion(minVersion = "1.17")
     @Overwrite
     public static double square(double n) {
         return MTH.square(n);
@@ -843,6 +847,7 @@ public class MathHelperMixin {
      * @reason Implement in Rust
      */
     // @Config(name = "int square")
+    @IfMinecraftVersion(minVersion = "1.17")
     @Overwrite
     public static int square(int n) {
         return MTH.square(n);
@@ -983,7 +988,7 @@ public class MathHelperMixin {
      * @author QPCrummer
      * @reason Implement in Rust
      */
-    @IfMinecraftVersion(maxVersion = "1.17.1")
+    @IfMinecraftVersion(minVersion = "1.17", maxVersion = "1.17.1")
     @Overwrite
     public static double magnitude(int a, double b, int c) {
         return MTH.magnitude(a, b, c);
