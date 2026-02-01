@@ -304,6 +304,7 @@ public class MathHelperMixin {
      * @reason Implement in Rust
      */
     // @Config(name = "is multiple of")
+    @IfMinecraftVersion(minVersion = "1.19.3")
     @Overwrite
     public static boolean isMultipleOf(int a, @NonZero int b) {
         return MTH.isMultipleOf(a, b);
