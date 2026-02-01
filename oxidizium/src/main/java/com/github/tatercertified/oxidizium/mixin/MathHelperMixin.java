@@ -962,6 +962,7 @@ public class MathHelperMixin {
      * @reason Implement in Rust
      */
     // @Config(name = "multiply fract")
+    @IfMinecraftVersion(minVersion = "1.20.5")
     @Overwrite
     public static int multiplyFraction(Fraction fraction, int multiplier) {
         return MTH.multiplyFraction(fraction.getNumerator(), fraction.getDenominator(), multiplier);
