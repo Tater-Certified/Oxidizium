@@ -410,6 +410,7 @@ public class MathHelperMixin {
      * @reason Implement in Rust
      */
     // @Config(name = "step towards")
+    @IfMinecraftVersion(minVersion = "1.16")
     @Overwrite
     public static float stepTowards(float from, float to, float step) {
         return MTH.stepTowards(from, to, step);
@@ -420,6 +421,7 @@ public class MathHelperMixin {
      * @reason Implement in Rust
      */
     // @Config(name = "step unwrapped towards")
+    @IfMinecraftVersion(minVersion = "1.16")
     @Overwrite
     public static float stepUnwrappedAngleTowards(float from, float to, float step) {
         return MTH.stepUnwrappedAngleTowards(from, to, step);
@@ -553,6 +555,7 @@ public class MathHelperMixin {
      * @reason Implement in Rust
      */
     // @Config(name = "double get lerp")
+    @IfMinecraftVersion(minVersion = "1.16")
     @Overwrite
     public static double getLerpProgress(double value, double start, double end) {
         return MTH.getLerpProgress(value, start, end);
@@ -826,6 +829,7 @@ public class MathHelperMixin {
      * @reason Implement in Rust
      */
     // @Config(name = "float square")
+    @IfMinecraftVersion(minVersion = "1.16")
     @Overwrite
     public static float square(float n) {
         return MTH.square(n);
@@ -913,6 +917,7 @@ public class MathHelperMixin {
      * @reason Implement in Rust
      */
     // @Config(name = "round up")
+    @IfMinecraftVersion(minVersion = "1.16")
     @Overwrite
     public static int roundUpToMultiple(int value, @NonZero int divisor) {
         return MTH.roundUpToMultiple(value, divisor);
