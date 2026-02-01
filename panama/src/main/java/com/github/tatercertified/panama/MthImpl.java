@@ -6,11 +6,21 @@ import com.github.tatercertified.rust.lib_h;
 public class MthImpl implements Mth {
     @Override
     public float sin(double value) {
-        return lib_h.sin_float(value);
+        return lib_h.sin_double(value);
     }
 
     @Override
     public float cos(double value) {
+        return lib_h.cos_double(value);
+    }
+
+    @Override
+    public float sin(float value) {
+        return lib_h.sin_float(value);
+    }
+
+    @Override
+    public float cos(float value) {
         return lib_h.cos_float(value);
     }
 
@@ -451,11 +461,21 @@ public class MthImpl implements Mth {
 
     @Override
     public float lithiumSin(double value) {
-        return lib_h.lithium_sin_float(value);
+        return lib_h.lithium_sin_double(value);
     }
 
     @Override
     public float lithiumCos(double value) {
+        return lib_h.lithium_cos_double(value);
+    }
+
+    @Override
+    public float lithiumSin(float value) {
+        return lib_h.lithium_sin_float(value);
+    }
+
+    @Override
+    public float lithiumCos(float value) {
         return lib_h.lithium_cos_float(value);
     }
 }

@@ -22,8 +22,8 @@
   ],
   "depends": {
     "fabricloader": "*",
-    "minecraft": ">=1.21.11",
-    "java": ">=22"
+    "minecraft": ">=${minecraft_version}",
+    "java": "${java_ver}"
   },
   "custom": {
     "lithium:options": {

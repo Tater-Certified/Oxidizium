@@ -18,7 +18,7 @@ public class MathHelperMixin {
      * @author QPCrummer
      * @reason Implement in Rust
      */
-    // @Config(name = "sin")
+    @IfMinecraftVersion(minVersion = "1.21.11")
     @IfBoolean(booleanPath = "com.github.tatercertified.oxidizium.Config", booleanMethodName = "isLithiumOptimizationEnabled", negate = true)
     @Overwrite
     public static float sin(double value) {
@@ -29,10 +29,32 @@ public class MathHelperMixin {
      * @author QPCrummer
      * @reason Implement in Rust
      */
-    // @Config(name = "cos")
+    @IfMinecraftVersion(minVersion = "1.21.11")
     @IfBoolean(booleanPath = "com.github.tatercertified.oxidizium.Config", booleanMethodName = "isLithiumOptimizationEnabled", negate = true)
     @Overwrite
-        public static float cos(double value) {
+    public static float cos(double value) {
+        return MTH.cos(value);
+    }
+
+    /**
+     * @author QPCrummer
+     * @reason Implement in Rust
+     */
+    @IfMinecraftVersion(maxVersion = "1.21.10")
+    @IfBoolean(booleanPath = "com.github.tatercertified.oxidizium.Config", booleanMethodName = "isLithiumOptimizationEnabled", negate = true)
+    @Overwrite
+    public static float sin(float value) {
+        return MTH.sin(value);
+    }
+
+    /**
+     * @author QPCrummer
+     * @reason Implement in Rust
+     */
+    @IfMinecraftVersion(maxVersion = "1.21.10")
+    @IfBoolean(booleanPath = "com.github.tatercertified.oxidizium.Config", booleanMethodName = "isLithiumOptimizationEnabled", negate = true)
+    @Overwrite
+    public static float cos(float value) {
         return MTH.cos(value);
     }
 
@@ -180,6 +202,7 @@ public class MathHelperMixin {
      * @author QPCrummer
      * @reason Implement in Rust
      */
+    @IfMinecraftVersion(minVersion = "1.21.11")
     @Overwrite
     public static int method_76800(int i, int j) {
         return MTH.method_76800(i, j);
@@ -189,6 +212,7 @@ public class MathHelperMixin {
      * @author QPCrummer
      * @reason Implement in Rust
      */
+    @IfMinecraftVersion(minVersion = "1.21.11")
     @Overwrite
     public static float method_76799(float f, float g) {
         return MTH.method_76799(f, g);
@@ -198,6 +222,7 @@ public class MathHelperMixin {
      * @author QPCrummer
      * @reason Implement in Rust
      */
+    @IfMinecraftVersion(minVersion = "1.21.11")
     @Overwrite
     public static int method_76801(int i, int j, int k, int l) {
         return MTH.method_76801(i, j, k, l);

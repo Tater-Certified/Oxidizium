@@ -28,6 +28,7 @@ processResources {
     inputs.property "loader_version", project.loader_version
     inputs.property "modid", project.modid
     inputs.property "mod", project.mod
+    inputs.property "java_ver", project.java_ver
     filteringCharset "UTF-8"
 
     filesMatching("fabric.mod.json") {
@@ -35,7 +36,8 @@ processResources {
                 "minecraft_version": project.minecraft_version,
                 "loader_version": project.loader_version,
                 "modid": project.modid,
-                "mod": project.mod
+                "mod": project.mod,
+                "java_ver": project.java_ver
     }
 }
 

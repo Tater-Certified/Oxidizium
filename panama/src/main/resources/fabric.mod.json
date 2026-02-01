@@ -15,12 +15,7 @@
     "environment": "*",
     "depends": {
         "fabricloader": "*",
-        "minecraft": ">=1.21.11",
-        "java": ">=22"
-    },
-    "custom": {
-        "lithium:options": {
-            "math.sine_lut": false
-        }
+        "minecraft": ">=${minecraft_version}",
+        "java": "${java_ver}"
     }
 }

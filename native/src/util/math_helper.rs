@@ -54,8 +54,26 @@ static COSIN_OF_ARCSIN_TABLE: Lazy<[f64; 257]> = Lazy::new(|| {
 
 /// Computes the sine of an input, x, in radians
 #[no_mangle]
-pub extern "C" fn sin_float(x: f64) -> f32 {
+pub extern "C" fn sin_double(x: f64) -> f32 {
     SINE_TABLE[((x * 10430.378350470453_f64) as i32 & 65535) as usize]
+}
+
+/// Computes the sine of an input, x, in radians
+#[no_mangle]
+pub extern "C" fn sin_float(x: f32) -> f32 {
+    SINE_TABLE[((x * 10430.378_f32) as i32 & 65535) as usize]
+}
+
+/// Computes the cosine of an input, x, in radians
+#[no_mangle]
+pub extern "C" fn cos_float(x: f32) -> f32 {
+    SINE_TABLE[((x * 10430.378_f32 + 16384.0_f32) as i32 & 65535) as usize]
+}
+
+/// Computes the cosine of an input, x, in radians
+#[no_mangle]
+pub extern "C" fn cos_double(x: f64) -> f32 {
+    SINE_TABLE[((x * 10430.378350470453_f64 + 16384.0_f64) as i32 & 65535) as usize]
 }
 
 fn lookup(index: i32) -> f32 {
@@ -73,21 +91,29 @@ fn lookup(index: i32) -> f32 {
 /// Computes the sine of an input, x, in radians
 /// Optimized version from Lithium
 #[no_mangle]
-pub extern "C" fn lithium_sin_float(x: f64) -> f32 {
+pub extern "C" fn lithium_sin_float(x: f32) -> f32 {
+    lookup((x * 10430.378_f32) as i32 & 0xFFFF)
+}
+
+/// Computes the cosine of an input, x, in radians
+/// Optimized version from Lithium
+#[no_mangle]
+pub extern "C" fn lithium_cos_float(x: f32) -> f32 {
+    lookup((x * 10430.378_f32 + 16384.0_f32) as i32 & 0xFFFF)
+}
+
+/// Computes the sine of an input, x, in radians
+/// Optimized version from Lithium
+#[no_mangle]
+pub extern "C" fn lithium_sin_double(x: f64) -> f32 {
     lookup((x * 10430.378350470453_f64) as i32 & 0xFFFF)
 }
 
 /// Computes the cosine of an input, x, in radians
 /// Optimized version from Lithium
 #[no_mangle]
-pub extern "C" fn lithium_cos_float(x: f64) -> f32 {
+pub extern "C" fn lithium_cos_double(x: f64) -> f32 {
     lookup((x * 10430.378350470453_f64 + 16384.0_f64) as i32 & 0xFFFF)
-}
-
-/// Computes the cosine of an input, x, in radians
-#[no_mangle]
-pub extern "C" fn cos_float(x: f64) -> f32 {
-    SINE_TABLE[((x * 10430.378350470453_f64 + 16384.0_f64) as i32 & 65535) as usize]
 }
 
 /// Square roots the input x

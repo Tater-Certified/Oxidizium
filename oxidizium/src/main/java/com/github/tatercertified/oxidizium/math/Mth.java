@@ -5,6 +5,8 @@ import com.github.tatercertified.oxidizium.utils.annotation.*;
 public interface Mth {
     float sin(double value);
     float cos(double value);
+    float sin(float value);
+    float cos(float value);
     float sqrt(@PositiveOnly float value);
     int floor(float value);
     int floor(double value);
@@ -94,4 +96,6 @@ public interface Mth {
     int multiplyFraction(int numerator, int denominator, int multiplier);
     float lithiumSin(double value);
     float lithiumCos(double value);
+    float lithiumSin(float value);
+    float lithiumCos(float value);
 }

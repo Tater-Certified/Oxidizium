@@ -6,11 +6,21 @@ import com.github.tatercertified.oxidizium.math.Mth;
 public class MthImpl implements Mth {
     @Override
     public float sin(double value) {
-        return OxidiziumLib.sin_float(value);
+        return OxidiziumLib.sin_double(value);
     }
 
     @Override
     public float cos(double value) {
+        return OxidiziumLib.cos_double(value);
+    }
+
+    @Override
+    public float sin(float value) {
+        return OxidiziumLib.sin_float(value);
+    }
+
+    @Override
+    public float cos(float value) {
         return OxidiziumLib.cos_float(value);
     }
 
@@ -451,11 +461,21 @@ public class MthImpl implements Mth {
 
     @Override
     public float lithiumSin(double value) {
-        return OxidiziumLib.lithium_sin_float(value);
+        return OxidiziumLib.lithium_sin_double(value);
     }
 
     @Override
     public float lithiumCos(double value) {
+        return OxidiziumLib.lithium_cos_double(value);
+    }
+
+    @Override
+    public float lithiumSin(float value) {
+        return OxidiziumLib.lithium_sin_float(value);
+    }
+
+    @Override
+    public float lithiumCos(float value) {
         return OxidiziumLib.lithium_cos_float(value);
     }
 }

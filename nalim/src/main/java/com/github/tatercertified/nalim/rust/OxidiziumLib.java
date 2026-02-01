@@ -6,10 +6,16 @@ import one.nalim.Link;
 @Library("oxidizium")
 public class OxidiziumLib {
     @Link
-    public static native float sin_float(double value);
+    public static native float sin_float(float value);
 
     @Link
-    public static native float cos_float(double value);
+    public static native float cos_float(float value);
+
+    @Link
+    public static native float sin_double(double value);
+
+    @Link
+    public static native float cos_double(double value);
 
     @Link
     public static native float sqrt_float(float value);
@@ -278,8 +284,14 @@ public class OxidiziumLib {
     public static native int multiply_fraction(int numerator, int denominator, int multiplier);
 
     @Link
-    public static native float lithium_sin_float(double value);
+    public static native float lithium_sin_float(float value);
 
     @Link
-    public static native float lithium_cos_float(double value);
+    public static native float lithium_cos_float(float value);
+
+    @Link
+    public static native float lithium_sin_double(double value);
+
+    @Link
+    public static native float lithium_cos_double(double value);
 }
