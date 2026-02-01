@@ -255,6 +255,7 @@ public class MathHelperMixin {
      * @reason Implement in Rust
      */
     // @Config(name = "float approx eq")
+    @IfMinecraftVersion(minVersion = "1.14.4")
     @Overwrite
     public static boolean approximatelyEquals(float a, float b) {
         return MTH.approximatelyEquals(a, b);
