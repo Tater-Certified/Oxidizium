@@ -945,6 +945,12 @@ pub extern "C" fn magnitude_float(a: f32, b: f32, c: f32) -> f32 {
     a * a + b * b + c * c
 }
 
+/// Gets the magnitude of the vector
+#[no_mangle]
+pub extern "C" fn magnitude_int(a: i32, b: f64, c: i32) -> f64 {
+    ((a * a) as f64 + b * b + (c * c) as f64).sqrt()
+}
+
 /// Returns a rounded down to the nearest multiple of b.
 #[no_mangle]
 pub extern "C" fn round_down_to_multiple(a: f64, b: i32) -> i32 {

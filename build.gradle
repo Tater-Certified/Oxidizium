@@ -27,6 +27,7 @@ subprojects {
         minecraft "com.mojang:minecraft:${project.minecraft_version}"
         mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
         modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
+        include(implementation 'org.joml:joml:1.10.8')
         include(implementation 'com.github.Tater-Certified:MixinConstraints:4856759a06')
     }
 }

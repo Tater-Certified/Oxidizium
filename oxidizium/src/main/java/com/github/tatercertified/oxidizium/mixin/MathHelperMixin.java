@@ -398,6 +398,7 @@ public class MathHelperMixin {
      * @reason Implement in Rust
      */
     // @Config(name = "clamp angle")
+    @IfMinecraftVersion(minVersion = "1.18")
     @Overwrite
     public static float clampAngle( float value, float mean, float delta) {
         return MTH.clampAngle(value, mean, delta);
@@ -474,6 +475,7 @@ public class MathHelperMixin {
      * @reason Implement in Rust
      */
     // @Config(name = "ceil log 2")
+    @IfMinecraftVersion(minVersion = "1.18")
     @Overwrite
     public static int ceilLog2(int value) {
         return MTH.ceilLog2(value);
@@ -559,6 +561,7 @@ public class MathHelperMixin {
      * @reason Implement in Rust
      */
     // @Config(name = "float get lerp")
+    @IfMinecraftVersion(minVersion = "1.18")
     @Overwrite
     public static float getLerpProgress(float value, float start, float end) {
         return MTH.getLerpProgress(value, start, end);
@@ -849,6 +852,7 @@ public class MathHelperMixin {
      * @reason Implement in Rust
      */
     // @Config(name = "long square")
+    @IfMinecraftVersion(minVersion = "1.18")
     @Overwrite
     public static long square(long n) {
         return MTH.square(n);
@@ -913,6 +917,7 @@ public class MathHelperMixin {
      * @reason Implement in Rust
      */
     // @Config(name = "ceilDiv")
+    @IfMinecraftVersion(minVersion = "1.18")
     @Overwrite
     public static int ceilDiv(int a, @NonZero int b) {
         return MTH.ceilDiv(a, b);
@@ -934,6 +939,7 @@ public class MathHelperMixin {
      * @reason Implement in Rust
      */
     // @Config(name = "double hypot")
+    @IfMinecraftVersion(minVersion = "1.18")
     @Overwrite
     public static double hypot(double a, double b) {
         return MTH.hypot(a, b);
@@ -966,8 +972,19 @@ public class MathHelperMixin {
      * @reason Implement in Rust
      */
     // @Config(name = "double mag")
+    @IfMinecraftVersion(minVersion = "1.18")
     @Overwrite
     public static double magnitude(double a, double b, double c) {
+        return MTH.magnitude(a, b, c);
+    }
+
+    /**
+     * @author QPCrummer
+     * @reason Implement in Rust
+     */
+    @IfMinecraftVersion(maxVersion = "1.17.1")
+    @Overwrite
+    public static double magnitude(int a, double b, int c) {
         return MTH.magnitude(a, b, c);
     }
 
@@ -987,6 +1004,7 @@ public class MathHelperMixin {
      * @reason Implement in Rust
      */
     // @Config(name = "round down")
+    @IfMinecraftVersion(minVersion = "1.18")
     @Overwrite
     public static int roundDownToMultiple(double a, int b) {
         return MTH.roundDownToMultiple(a, b);

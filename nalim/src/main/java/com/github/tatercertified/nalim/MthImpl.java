@@ -465,6 +465,11 @@ public class MthImpl implements Mth {
     }
 
     @Override
+    public double magnitude(int a, double b, int c) {
+        return OxidiziumLib.magnitude_int(a, b, c);
+    }
+
+    @Override
     public int roundDownToMultiple(double a, int b) {
         return OxidiziumLib.round_down_to_multiple(a, b);
     }

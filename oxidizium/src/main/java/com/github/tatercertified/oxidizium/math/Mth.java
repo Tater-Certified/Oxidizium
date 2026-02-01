@@ -95,6 +95,7 @@ public interface Mth {
     double squaredMagnitude(double a, double b, double c);
     double magnitude(double a, double b, double c);
     float magnitude(float a, float b, float c);
+    double magnitude(int a, double b, int c);
     int roundDownToMultiple(double a, int b);
     int multiplyFraction(int numerator, int denominator, int multiplier);
     float lithiumSin(double value);

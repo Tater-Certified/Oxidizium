@@ -287,6 +287,9 @@ public class OxidiziumLib {
     public static native float magnitude_float(float a, float b, float c);
 
     @Link
+    public static native double magnitude_int(int a, double b, int c);
+
+    @Link
     public static native int round_down_to_multiple(double a, int b);
 
     @Link
