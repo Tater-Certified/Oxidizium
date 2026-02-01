@@ -194,6 +194,7 @@ public class MathHelperMixin {
      * @reason Implement in Rust
      */
     // @Config(name = "float clamped lerp")
+    @IfMinecraftVersion(minVersion = "1.17.1")
     @Overwrite
     public static float clampedLerp(float delta, float start, float end) {
         return MTH.clampedLerp(start, end, delta);
