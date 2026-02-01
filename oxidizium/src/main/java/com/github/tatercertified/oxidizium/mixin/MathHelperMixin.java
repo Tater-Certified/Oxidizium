@@ -607,6 +607,7 @@ public class MathHelperMixin {
      * @reason Implement in Rust
      */
     // @Config(name = "hsv to argb")
+    @IfMinecraftVersion(minVersion = "1.21")
     @Overwrite
     public static int hsvToArgb(@PositiveOnly float hue, @PositiveOnly float saturation, @PositiveOnly float value, @PositiveOnly int alpha) {
         return MTH.hsvToArgb(hue, saturation, value, alpha);
@@ -931,6 +932,7 @@ public class MathHelperMixin {
      * @reason Implement in Rust
      */
     // @Config(name = "float mag")
+    @IfMinecraftVersion(minVersion = "1.21")
     @Overwrite
     public static float magnitude(float a, float b, float c) {
         return MTH.magnitude(a, b, c);
