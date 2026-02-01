@@ -182,6 +182,9 @@ public class OxidiziumLib {
     public static native double fast_inverse_sqrt(double x);
 
     @Link
+    public static native float fast_inverse_sqrt_float(float x);
+
+    @Link
     public static native float fast_inverse_cbrt(float x);
 
     @Link

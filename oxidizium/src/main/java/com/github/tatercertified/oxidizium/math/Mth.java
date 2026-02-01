@@ -60,6 +60,7 @@ public interface Mth {
     float inverseSqrt(@Bounded(minInclusive = 1, maxExclusive = 100) float x);
     double inverseSqrt(@Bounded(minInclusive = 1, maxExclusive = 100) double x);
     double fastInverseSqrt(double x);
+    float fastInverseSqrt(float x);
     float fastInverseCbrt(float x);
     int hsvToRgb(@PositiveOnly float hue, @PositiveOnly float saturation, @PositiveOnly float value);
     int hsvToArgb(@PositiveOnly float hue, @PositiveOnly float saturation, @PositiveOnly float value, @PositiveOnly int alpha);

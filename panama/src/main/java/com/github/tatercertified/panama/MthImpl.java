@@ -290,6 +290,11 @@ public class MthImpl implements Mth {
     }
 
     @Override
+    public float fastInverseSqrt(float x) {
+        return lib_h.fast_inverse_sqrt_float(x);
+    }
+
+    @Override
     public float fastInverseCbrt(float x) {
         return lib_h.fast_inverse_cbrt(x);
     }

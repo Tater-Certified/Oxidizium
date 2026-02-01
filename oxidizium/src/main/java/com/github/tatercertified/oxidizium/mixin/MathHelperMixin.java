@@ -578,6 +578,7 @@ public class MathHelperMixin {
      * @reason Implement in Rust
      */
     // @Config(name = "float inverse sqrt")
+    @IfMinecraftVersion(minVersion = "1.19.4")
     @Overwrite
     public static float inverseSqrt(@Bounded(minInclusive = 1, maxExclusive = 100) float x) {
         return MTH.inverseSqrt(x);
@@ -588,6 +589,7 @@ public class MathHelperMixin {
      * @reason Implement in Rust
      */
     // @Config(name = "double inverse sqrt")
+    @IfMinecraftVersion(minVersion = "1.19.4")
     @Overwrite
     public static double inverseSqrt(@Bounded(minInclusive = 1, maxExclusive = 100) double x) {
         return MTH.inverseSqrt(x);
@@ -600,6 +602,16 @@ public class MathHelperMixin {
     @Deprecated
     @Overwrite
     public static double fastInverseSqrt(double x) {
+        return MTH.fastInverseSqrt(x);
+    }
+
+    /**
+     * @author QPCrummer
+     * @reason Implement in Rust
+     */
+    @IfMinecraftVersion(maxVersion = "1.19.3")
+    @Overwrite
+    public static float fastInverseSqrt(float x) {
         return MTH.fastInverseSqrt(x);
     }
 

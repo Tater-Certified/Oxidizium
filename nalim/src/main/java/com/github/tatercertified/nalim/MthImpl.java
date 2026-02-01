@@ -290,6 +290,11 @@ public class MthImpl implements Mth {
     }
 
     @Override
+    public float fastInverseSqrt(float x) {
+        return OxidiziumLib.fast_inverse_sqrt_float(x);
+    }
+
+    @Override
     public float fastInverseCbrt(float x) {
         return OxidiziumLib.fast_inverse_cbrt(x);
     }

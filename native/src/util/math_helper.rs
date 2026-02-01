@@ -12,6 +12,7 @@ const ROUNDER_256THS: f64 = f64::from_bits(4805340802404319232);
 const DOUBLE_PI: f64 = std::f64::consts::PI * 2.0_f64;
 const DOUBLE_PI_F32: f32 = std::f32::consts::PI * 2.0_f32;
 const INVERSE_SQRT: u64 = 6910469410427058090;
+const INVERSE_SQRT_F32: u32 = 1597463007;
 const PACK: f32 = 256.0_f32 / 360.0_f32;
 
 static SINE_TABLE: Lazy<[f32; 65536]> = Lazy::new(|| {
@@ -597,6 +598,17 @@ pub extern "C" fn fast_inverse_sqrt(mut x: f64) -> f64 {
     let mut l: u64 = x.to_bits();
     l = INVERSE_SQRT - (l >> 1);
     x = f64::from_bits(l);
+    x *= 1.5 - d * x * x;
+    x
+}
+
+/// Approximation of 1 / sqrt(x)
+#[no_mangle]
+pub extern "C" fn fast_inverse_sqrt_float(mut x: f32) -> f32 {
+    let d: f32 = 0.5_f32 * x;
+    let mut l: u32 = x.to_bits();
+    l = INVERSE_SQRT_F32 - (l >> 1);
+    x = f32::from_bits(l);
     x *= 1.5 - d * x * x;
     x
 }
