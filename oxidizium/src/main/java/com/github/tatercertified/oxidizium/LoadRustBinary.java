@@ -1,9 +1,8 @@
 package com.github.tatercertified.oxidizium;
 
-import com.github.tatercertified.oxidizium.utils.HashUtils;
-import net.fabricmc.loader.api.entrypoint.PreLaunchEntrypoint;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.SystemUtils;
+import com.github.tatercertified.oxidizium.utils.HashUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -13,9 +12,8 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.Locale;
 
-public class LoadRustBinary implements PreLaunchEntrypoint {
-    @Override
-    public void onPreLaunch() {
+public class LoadRustBinary {
+    public static void onPreLaunch() {
         String osName = System.getProperty("os.name").toLowerCase(Locale.ENGLISH);
         String arch = System.getProperty("os.arch").toLowerCase(Locale.ENGLISH);
 
@@ -49,14 +47,18 @@ public class LoadRustBinary implements PreLaunchEntrypoint {
 
         String binaryNameNoExtension = FilenameUtils.removeExtension(binaryName);
 
-        copyNativeLib(binaryName, outputName, binaryNameNoExtension);
+        Path output = copyNativeLib(binaryName, outputName, binaryNameNoExtension);
+
+        if (Config.isNalim()) {
+            System.load(output.toAbsolutePath().toString());
+        }
     }
 
     public static Path getWorkingDir() {
         return Paths.get("").toAbsolutePath();
     }
 
-    private static void copyNativeLib(String binaryName, String outputName, String binaryNameNoExt) {
+    private static Path copyNativeLib(String binaryName, String outputName, String binaryNameNoExt) {
         try (InputStream inputStream = LoadRustBinary.class.getResourceAsStream("/" + binaryName)) {
             if (inputStream == null) {
                 throw new RuntimeException("Resource not found: /" + binaryName);
@@ -68,6 +70,7 @@ public class LoadRustBinary implements PreLaunchEntrypoint {
             if (Files.notExists(destinationPath) || !HashUtils.checkHash(destinationPath, binaryNameNoExt)) {
                 Files.copy(inputStream, destinationPath, StandardCopyOption.REPLACE_EXISTING);
             }
+            return destinationPath;
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

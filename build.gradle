@@ -1,9 +1,11 @@
 import java.nio.file.Files
 import java.nio.file.StandardCopyOption
 import java.security.MessageDigest
+import groovy.json.JsonSlurper
+import groovy.json.JsonOutput
 
 plugins {
-    id 'fabric-loom' version '1.14-SNAPSHOT' apply false
+    id 'fabric-loom' version '1.15-SNAPSHOT' apply false
 }
 
 subprojects {
@@ -13,6 +15,11 @@ subprojects {
     repositories {
         mavenCentral()
         maven { url 'https://jitpack.io' }
+        maven { url = "https://maven.bawnorton.com/releases" }
+        maven {
+            name = "Modrinth"
+            url = "https://api.modrinth.com/maven"
+        }
     }
 
     dependencies {
@@ -42,7 +49,7 @@ if (os.isWindows()) {
 
 def jextractTar = layout.buildDirectory.file("jextract/jextract.tar.gz")
 def jextractExtractDir = layout.buildDirectory.dir("jextract/jextract-22")
-def outputDir = layout.projectDirectory.dir("oxidizium/src/main/java")
+def outputDir = layout.projectDirectory.dir("panama/src/main/java")
 
 tasks.register('downloadJextract') {
     outputs.file(jextractTar)
@@ -108,7 +115,7 @@ tasks.register('modifyGeneratedJava') {
 
     doLast {
         println "Modifying generated Java file..."
-        def generatedFile = file("oxidizium/src/main/java/com/github/tatercertified/rust/lib_h.java")
+        def generatedFile = file("panama/src/main/java/com/github/tatercertified/rust/lib_h.java")
 
         if (generatedFile.exists()) {
             def text = generatedFile.text
@@ -298,13 +305,71 @@ tasks.register('postRust') {
 
 tasks.register('compileLocally') {
     dependsOn tasks.named('postRust')
-    dependsOn tasks.named('devOxidizumBuild')
+    dependsOn tasks.named('copyOxidiziumResources')
+    dependsOn project(':panama').tasks.named('build')
+    dependsOn project(':nalim').tasks.named('build')
 }
 
 tasks.register('devOxidizumBuild') {
     dependsOn project(':testMod').tasks.named('build')
     mustRunAfter 'postRust'
 }
+
+tasks.register("copyOxidiziumResources") {
+    def sourceDir = file("oxidizium/src/main/resources")
+    def targets = [
+            file("panama/src/main/resources"),
+            file("nalim/src/main/resources")
+    ]
+
+    doLast {
+        if (!sourceDir.exists()) {
+            println "No oxidizium resources found at ${sourceDir}, skipping."
+            return
+        }
+
+        targets.each { targetDir ->
+            println "Copying selected resources from ${sourceDir} → ${targetDir}"
+
+            // Copy assets and META-INF folders
+            copy {
+                from sourceDir
+                into targetDir
+                include 'assets/**'
+            }
+
+            // Copy fabric.mod.json
+            def sourceJson = new File(sourceDir, "fabric.mod.json")
+            if (!sourceJson.exists()) {
+                println "No fabric.mod.json found in ${sourceDir}, skipping JSON modification."
+                return
+            }
+
+            def targetJson = new File(targetDir, "fabric.mod.json")
+            copy {
+                from sourceJson
+                into targetDir
+            }
+
+            // Read JSON
+            def jsonSlurper = new JsonSlurper()
+            def jsonContent = jsonSlurper.parse(targetJson)
+
+            // Remove unwanted sections
+            jsonContent.remove("entrypoints")
+            jsonContent.remove("mixins")
+            jsonContent.remove("custom")
+
+            // Write back formatted JSON
+            targetJson.text = JsonOutput.prettyPrint(JsonOutput.toJson(jsonContent))
+
+            println "Copied and cleaned fabric.mod.json for ${targetDir}"
+        }
+
+        println "Selected resources copied and cleaned successfully."
+    }
+}
+
 
 // - - - - Task Configuration - - - - \\
 
@@ -313,10 +378,47 @@ tasks.named('hashLib').orNull.dependsOn('moveBinaries')
 project(':testMod').tasks.named('build').configure {
     dependsOn tasks.named('hashLib')
 }
-project(':oxidizium').tasks.named('build').configure {
-    mustRunAfter tasks.named('hashLib')
-    shouldRunAfter tasks.named('postRust')
-}
+
 project(':oxidizium').tasks.named('compileJava').configure {
     mustRunAfter tasks.named('runJextract')
+}
+
+project(':oxidizium').tasks.named('processResources').configure {
+    dependsOn rootProject.tasks.named('hashLib')
+}
+
+project(':nalim').tasks.named('jar').configure {
+    mustRunAfter rootProject.tasks.named('hashLib')
+}
+
+project(":panama") {
+    tasks.withType(Jar).configureEach {
+        if (name == "sourcesJar") {
+            dependsOn rootProject.tasks.named("runJextract")
+        }
+    }
+
+    tasks.named("compileJava").configure {
+        dependsOn rootProject.tasks.named("runJextract")
+    }
+
+    tasks.named('jar').configure {
+        mustRunAfter rootProject.tasks.named('hashLib')
+    }
+}
+
+project(":nalim") {
+    tasks.withType(Jar).configureEach {
+        if (name == "sourcesJar") {
+            dependsOn rootProject.tasks.named("runJextract")
+        }
+    }
+
+    tasks.named("compileJava").configure {
+        dependsOn rootProject.tasks.named("runJextract")
+    }
+
+    tasks.named('jar').configure {
+        mustRunAfter rootProject.tasks.named('hashLib')
+    }
 }

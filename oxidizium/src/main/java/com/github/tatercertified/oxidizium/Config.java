@@ -1,5 +1,7 @@
 package com.github.tatercertified.oxidizium;
 
+import com.github.tatercertified.oxidizium.utils.backend.Backend;
+import com.github.tatercertified.oxidizium.utils.backend.BackendType;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.impl.FabricLoaderImpl;
 
@@ -95,5 +97,13 @@ public record Config(String version, boolean debug, boolean test, boolean reduce
 
     public static boolean isTestingEnabled() {
         return instance.test();
+    }
+
+    public static boolean isNalim() {
+        return Oxidizium.BACKEND.backendType() == BackendType.Nalim;
+    }
+
+    public static boolean isPanama() {
+        return Oxidizium.BACKEND.backendType() == BackendType.Panama;
     }
 }

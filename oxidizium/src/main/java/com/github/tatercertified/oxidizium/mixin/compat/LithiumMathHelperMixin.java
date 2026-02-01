@@ -1,14 +1,13 @@
 package com.github.tatercertified.oxidizium.mixin.compat;
 
-// import com.github.tatercertified.mixin_config.annotations.Config;
-import com.github.tatercertified.rust.lib_h;
 import com.moulberry.mixinconstraints.annotations.IfBoolean;
 import com.moulberry.mixinconstraints.annotations.IfBooleans;
 import net.minecraft.util.math.MathHelper;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 
-// @Config(name = "Lithium Native Math", dependencies = "Native Math")
+import static com.github.tatercertified.oxidizium.Oxidizium.MTH;
+
 @IfBooleans(value = {
         @IfBoolean(booleanPath = "com.github.tatercertified.oxidizium.Config", booleanMethodName = "isLithiumOptimizationEnabled"),
         @IfBoolean(booleanPath = "com.github.tatercertified.oxidizium.Config", booleanMethodName = "isTestingEnabled", negate = true)
@@ -22,7 +21,7 @@ public class LithiumMathHelperMixin {
     // @Config(name = "lithium sin", dependencies = "sin")
     @Overwrite
     public static float sin(double value) {
-        return lib_h.lithium_sin_float(value);
+        return MTH.lithiumSin(value);
     }
 
     /**
@@ -32,6 +31,6 @@ public class LithiumMathHelperMixin {
     // @Config(name = "lithium cos", dependencies = "cos")
     @Overwrite
     public static float cos(double value) {
-        return lib_h.lithium_cos_float(value);
+        return MTH.lithiumCos(value);
     }
 }

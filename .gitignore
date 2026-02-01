@@ -28,3 +28,9 @@
 .jextract_path_cache
 *.hash
 *.h
+/panama/src/main/java/com/github/tatercertified/rust
+/panama/.gradle
+/nalim/.gradle
+/nalim/build
+/panama/build/classes/java/main/com/github/tatercertified/rust
+/panama/build

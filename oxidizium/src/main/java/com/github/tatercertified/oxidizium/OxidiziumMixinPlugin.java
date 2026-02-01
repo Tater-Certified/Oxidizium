@@ -1,12 +1,8 @@
 package com.github.tatercertified.oxidizium;
 
-// import com.github.tatercertified.mixin_config.MCMixinConfigPlugin;
-// import com.github.tatercertified.mixin_config.MixinConfig;
-// import com.github.tatercertified.mixin_config.validation.Validator;
 import com.github.tatercertified.oxidizium.utils.asm.StripProcessor;
 import com.moulberry.mixinconstraints.MixinConstraints;
 import com.moulberry.mixinconstraints.mixin.MixinConstraintsBootstrap;
-// import net.fabricmc.loader.api.FabricLoader;
 import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
@@ -19,18 +15,10 @@ public class OxidiziumMixinPlugin implements IMixinConfigPlugin {
 
     @Override
     public void onLoad(String s) {
+        LoadRustBinary.onPreLaunch();
         Config.init();
-        /*
-        MixinConfig.init(
-                FabricLoader.getInstance().getConfigDir().resolve("oxidizium-mixins.txt"),
-                0,
-                Oxidizium.class
-        );
-
-         */
         this.mixinPackage = s;
         MixinConstraintsBootstrap.init(mixinPackage);
-        // Validator.preprocess();
     }
 
     @Override

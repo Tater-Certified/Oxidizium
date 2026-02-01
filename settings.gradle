@@ -8,4 +8,4 @@ pluginManagement {
     }
 }
 
-include("testMod", "oxidizium")
+include("testMod", "oxidizium", "panama", "nalim")

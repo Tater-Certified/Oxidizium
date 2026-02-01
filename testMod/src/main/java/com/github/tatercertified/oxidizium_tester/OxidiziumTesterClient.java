@@ -1,8 +1,8 @@
 package com.github.tatercertified.oxidizium_tester;
 
+import com.github.tatercertified.oxidizium.Config;
 import com.github.tatercertified.oxidizium.utils.MappingTranslator;
 import com.github.tatercertified.oxidizium_tester.test.TestingGUI;
-import com.github.tatercertified.oxidizium.Config;
 import imgui.app.Application;
 import net.fabricmc.api.ClientModInitializer;
 

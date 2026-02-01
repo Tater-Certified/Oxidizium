@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
-  "id": "oxidizium",
+  "id": "${modid}",
   "version": "${version}",
-  "name": "Oxidizium",
+  "name": "${mod}",
   "description": "Implementing Minecraft In Rust",
   "authors": [],
   "contact": {},
@@ -12,9 +12,6 @@
   "entrypoints": {
     "main": [
       "com.github.tatercertified.oxidizium.Oxidizium"
-    ],
-    "preLaunch": [
-      "com.github.tatercertified.oxidizium.LoadRustBinary"
     ],
     "mixinsquared": [
       "com.github.tatercertified.oxidizium.compat.DebugifyMixinCanceller"

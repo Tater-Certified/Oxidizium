@@ -22,7 +22,7 @@ static SINE_TABLE: Lazy<[f32; 65536]> = Lazy::new(|| {
     table
 });
 
-// From Lithium https://github.com/CaffeineMC/lithium/blob/develop/common/src/main/java/net/caffeinemc/mods/lithium/common/util/math/CompactSineLUT.java
+// From Lithium https://github.com/CaffeineMC/lithium/blob/develop/com/src/main/java/net/caffeinemc/mods/lithium/com/util/math/CompactSineLUT.java
 static SINE_TABLE_OPT: Lazy<[u32; 16385]> = Lazy::new(|| {
     let mut table = [0u32; 16385];
     for (i, value) in table.iter_mut().enumerate() {
@@ -31,7 +31,7 @@ static SINE_TABLE_OPT: Lazy<[u32; 16385]> = Lazy::new(|| {
     table
 });
 
-// From Lithium https://github.com/CaffeineMC/lithium/blob/develop/common/src/main/java/net/caffeinemc/mods/lithium/common/util/math/CompactSineLUT.java
+// From Lithium https://github.com/CaffeineMC/lithium/blob/develop/com/src/main/java/net/caffeinemc/mods/lithium/com/util/math/CompactSineLUT.java
 static SINE_TABLE_MIDPOINT_OPT: Lazy<f32> = Lazy::new(|| SINE_TABLE[SINE_TABLE.len() / 2_usize]);
 
 static ARCSIN_TABLE: Lazy<[f64; 257]> = Lazy::new(|| {
