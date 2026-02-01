@@ -153,6 +153,7 @@ public class MathHelperMixin {
      * @reason Implement in Rust
      */
     // @Config(name = "long clamp")
+    @IfMinecraftVersion(minVersion = "1.20.2")
     @Overwrite
     public static long clamp(long value, @Min long min, @Max long max) {
         return MTH.clamp(value, min, max);
@@ -638,6 +639,7 @@ public class MathHelperMixin {
      * @reason Implement in Rust
      */
     // @Config(name = "lerp positive")
+    @IfMinecraftVersion(minVersion = "1.20.2")
     @Overwrite
     public static int lerpPositive(float delta, int start, int end) {
         return MTH.lerpPositive(delta, start, end);
@@ -750,6 +752,7 @@ public class MathHelperMixin {
      * @reason Implement in Rust
      */
     // @Config(name = "double lerp deg")
+    @IfMinecraftVersion(minVersion = "1.20.2")
     @Overwrite
     public static double lerpAngleDegrees(double delta, double start, double end) {
         return MTH.lerpAngleDegrees(delta, start, end);
