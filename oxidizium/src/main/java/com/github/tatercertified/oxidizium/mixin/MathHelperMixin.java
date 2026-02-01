@@ -265,6 +265,7 @@ public class MathHelperMixin {
      * @reason Implement in Rust
      */
     // @Config(name = "double approx eq")
+    @IfMinecraftVersion(minVersion = "1.15")
     @Overwrite
     public static boolean approximatelyEquals(double a, double b) {
         return MTH.approximatelyEquals(a, b);
@@ -522,6 +523,7 @@ public class MathHelperMixin {
      * Negative values should return negative fractional parts!!!
      */
     // @Config(name = "float fraction")
+    @IfMinecraftVersion(minVersion = "1.15")
     @Overwrite
     public static float fractionalPart(float value) {
         return MTH.fractionalPart(value);
@@ -618,7 +620,7 @@ public class MathHelperMixin {
      * @author QPCrummer
      * @reason Implement in Rust
      */
-    @IfMinecraftVersion(maxVersion = "1.19.3")
+    @IfMinecraftVersion(minVersion = "1.15", maxVersion = "1.19.3")
     @Overwrite
     public static float fastInverseSqrt(float x) {
         return MTH.fastInverseSqrt(x);
@@ -629,6 +631,7 @@ public class MathHelperMixin {
      * @reason Implement in Rust
      */
     // @Config(name = "fast inverse cbrt")
+    @IfMinecraftVersion(minVersion = "1.15")
     @Overwrite
     public static float fastInverseCbrt(float x) {
         return MTH.fastInverseCbrt(x);
@@ -660,6 +663,7 @@ public class MathHelperMixin {
      * @reason Implement in Rust
      */
     // @Config(name = "ideal hash")
+    @IfMinecraftVersion(minVersion = "1.15")
     @Overwrite
     public static int idealHash(int value) {
         return MTH.idealHash(value);
