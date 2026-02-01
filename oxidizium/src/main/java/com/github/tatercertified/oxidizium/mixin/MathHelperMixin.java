@@ -662,6 +662,7 @@ public class MathHelperMixin {
      * @reason Implement in Rust
      */
     // @Config(name = "int lerp")
+    @IfMinecraftVersion(minVersion = "1.19.4")
     @Overwrite
     public static int lerp(float delta, int start, int end) {
         return MTH.lerp(delta, start, end);
@@ -735,6 +736,7 @@ public class MathHelperMixin {
      * @reason Implement in Rust
      */
     // @Config(name = "catmull rom")
+    @IfMinecraftVersion(minVersion = "1.19.2")
     @Overwrite
     public static float catmullRom(float delta, float p0, float p1, float p2, float p3) {
         return MTH.catmullRom(delta, p0, p1, p2, p3);
@@ -857,6 +859,7 @@ public class MathHelperMixin {
      * @reason Implement in Rust
      */
     // @Config(name = "double clamped map")
+    @IfMinecraftVersion(minVersion = "1.19.2")
     @Overwrite
     public static double clampedMap(double value, double oldStart, double oldEnd, double newStart, double newEnd) {
         return MTH.clampedMap(value, oldStart, oldEnd, newStart, newEnd);
@@ -867,6 +870,7 @@ public class MathHelperMixin {
      * @reason Implement in Rust
      */
     // @Config(name = "float clamped map")
+    @IfMinecraftVersion(minVersion = "1.19.2")
     @Overwrite
     public static float clampedMap(float value, float oldStart, float oldEnd, float newStart, float newEnd) {
         return MTH.clampedMap(value, oldStart, oldEnd, newStart, newEnd);
@@ -877,6 +881,7 @@ public class MathHelperMixin {
      * @reason Implement in Rust
      */
     // @Config(name = "double map")
+    @IfMinecraftVersion(minVersion = "1.19.2")
     @Overwrite
     public static double map(double value, double oldStart, double oldEnd, double newStart, double newEnd) {
         return MTH.map(value, oldStart, oldEnd, newStart, newEnd);
@@ -887,6 +892,7 @@ public class MathHelperMixin {
      * @reason Implement in Rust
      */
     // @Config(name = "float map")
+    @IfMinecraftVersion(minVersion = "1.19.2")
     @Overwrite
     public static float map(float value, float oldStart, float oldEnd, float newStart, float newEnd) {
         return MTH.map(value, oldStart, oldEnd, newStart, newEnd);
