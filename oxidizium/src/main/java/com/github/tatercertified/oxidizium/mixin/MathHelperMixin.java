@@ -313,6 +313,7 @@ public class MathHelperMixin {
      * @reason Implement in Rust
      */
     // @Config(name = "pack degrees")
+    @IfMinecraftVersion(minVersion = "1.21.2")
     @Overwrite
     public static byte packDegrees(float degrees) {
         return MTH.packDegrees(degrees);
@@ -323,6 +324,7 @@ public class MathHelperMixin {
      * @reason Implement in Rust
      */
     // @Config(name = "unpack degrees")
+    @IfMinecraftVersion(minVersion = "1.21.2")
     @Overwrite
     public static float unpackDegrees(byte packedDegrees) {
         return MTH.unpackDegrees(packedDegrees);
@@ -343,6 +345,7 @@ public class MathHelperMixin {
      * @reason Implement in Rust
      */
     // @Config(name = "long wrap degrees")
+    @IfMinecraftVersion(minVersion = "1.21.2")
     @Overwrite
     public static float wrapDegrees(long degrees) {
         return MTH.wrapDegrees(degrees);
@@ -756,6 +759,7 @@ public class MathHelperMixin {
      * @reason Implement in Rust
      */
     // @Config(name = "lerp rad")
+    @IfMinecraftVersion(minVersion = "1.21.2")
     @Overwrite
     public static float lerpAngleRadians(float delta, float start, float end) {
         return MTH.lerpAngleRadians(delta, start, end);
@@ -896,6 +900,7 @@ public class MathHelperMixin {
      * @reason Implement in Rust
      */
     // @Config(name = "float hypot")
+    @IfMinecraftVersion(minVersion = "1.21.2")
     @Overwrite
     public static float hypot(float a, float b) {
         return MTH.hypot(a, b);
