@@ -13,9 +13,12 @@
     "license": "MIT",
     "icon": "assets/oxidizium/icon.png",
     "environment": "*",
+    "mixins": [
+        "oxidizium.mixins.json"
+    ],
     "depends": {
         "fabricloader": "*",
-        "minecraft": ">=${minecraft_version}",
+        "minecraft": ">=1.14.3",
         "java": "${java_ver}"
     }
 }

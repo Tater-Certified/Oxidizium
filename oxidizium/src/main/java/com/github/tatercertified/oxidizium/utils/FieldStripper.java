@@ -137,7 +137,7 @@ public class FieldStripper {
                         toRemove.add(fieldInsn);
                         AbstractInsnNode prev = fieldInsn.getPrevious();
                         for (int j = 0; j < 3 && prev != null; j++) {
-                            toRemove.addFirst(prev);
+                            toRemove.add(0, prev);
                             prev = prev.getPrevious();
                         }
                     }

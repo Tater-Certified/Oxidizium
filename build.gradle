@@ -358,7 +358,9 @@ tasks.register("copyOxidiziumResources") {
 
             // Remove unwanted sections
             jsonContent.remove("entrypoints")
-            jsonContent.remove("mixins")
+            if (targetDir.getAbsolutePath().contains("nalim")) {
+                jsonContent.remove("mixins")
+            }
             jsonContent.remove("custom")
 
             // Write back formatted JSON

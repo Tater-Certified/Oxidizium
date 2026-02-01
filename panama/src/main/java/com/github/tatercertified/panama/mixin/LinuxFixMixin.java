@@ -1,4 +1,4 @@
-package com.github.tatercertified.oxidizium.mixin;
+package com.github.tatercertified.panama.mixin;
 
 import com.github.tatercertified.oxidizium.LoadRustBinary;
 import com.moulberry.mixinconstraints.annotations.IfBoolean;
