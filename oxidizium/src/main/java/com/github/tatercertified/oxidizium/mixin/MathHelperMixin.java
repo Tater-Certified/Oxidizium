@@ -488,6 +488,7 @@ public class MathHelperMixin {
      * @author QPCrummer
      * @reason Implement in Rust
      */
+    @IfMinecraftVersion(minVersion = "1.21.9")
     @Overwrite
     public static long ceilLong(double value) {
         return MTH.ceilLong(value);
