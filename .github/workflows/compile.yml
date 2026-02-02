@@ -109,38 +109,20 @@ jobs:
         name: liboxidizium_mac_arm64.dylib
         path: liboxidizium_mac_arm64.dylib
 
-  oxidizium:
-    needs: [rust_linux_x86, rust_linux_arm, rust_windows_x86, rust_windows_arm, rust_macos_x86, rust_macos_arm]
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v4
-    - name: Download Rust binaries
-      uses: actions/download-artifact@v7
-      with:
-        path: /home/runner/work/Oxidizium/Oxidizium
-        merge-multiple: true
-
-    - name: Remove Artifact Binaries
-      uses: geekyeggo/delete-artifact@v5
-      with:
-        name: |
-          liboxidizium_mac_arm64.dylib
-          liboxidizium_mac_x86.dylib
-          liboxidizium_linux_arm64.so
-          liboxidizium_linux_x86.so
-          oxidizium_windows_arm64.dll
-          oxidizium_windows_x86.dll
-          lib.h
-        failOnError: false
-
   gradle-builds:
-    needs: oxidizium
+    needs: [rust_linux_x86, rust_linux_arm, rust_windows_x86, rust_windows_arm, rust_macos_x86, rust_macos_arm]
     runs-on: ubuntu-latest
     strategy:
       matrix:
         module: [ panama, nalim, testMod ]
     steps:
       - uses: actions/checkout@v6
+
+      - name: Download Rust binaries
+        uses: actions/download-artifact@v7
+        with:
+          path: /home/runner/work/Oxidizium/Oxidizium
+          merge-multiple: true
 
       - name: Setup JDK
         uses: actions/setup-java@v5
@@ -162,3 +144,20 @@ jobs:
             ${{ matrix.module }}/build/libs/*.jar
             !${{ matrix.module }}/build/libs/*-sources.jar
           compression-level: 0
+
+  cleanup-binaries:
+    needs: gradle-builds
+    runs-on: ubuntu-latest
+    steps:
+      - name: Remove Artifact Binaries
+        uses: geekyeggo/delete-artifact@v5
+        with:
+          name: | 
+            liboxidizium_mac_arm64.dylib 
+            liboxidizium_mac_x86.dylib 
+            liboxidizium_linux_arm64.so 
+            liboxidizium_linux_x86.so 
+            oxidizium_windows_arm64.dll 
+            oxidizium_windows_x86.dll 
+            lib.h
+          failOnError: false
