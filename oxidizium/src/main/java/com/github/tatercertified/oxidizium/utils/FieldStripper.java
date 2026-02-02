@@ -1,6 +1,8 @@
 package com.github.tatercertified.oxidizium.utils;
 
 import com.github.tatercertified.oxidizium.Config;
+import com.github.zafarkhaja.semver.Version;
+import net.fabricmc.loader.api.FabricLoader;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.*;
 import org.slf4j.Logger;
@@ -15,6 +17,7 @@ import java.util.ListIterator;
  */
 public class FieldStripper {
     public static final Logger STRIPPER_LOGGER = LoggerFactory.getLogger("FieldStripper");
+    private static final Version MC_VER = getMcVer();
 
     public static void stripFieldsWithClassNode(String className, ClassNode node, String[][] fieldsToStrip) {
         if (Config.getInstance().debug()) {
@@ -23,31 +26,59 @@ public class FieldStripper {
         List<String> fields = new ArrayList<>();
 
         for (String[] field : fieldsToStrip) {
+            if (field.length == 3) {
+                String verConstraint = field[2];
+                if (!MC_VER.satisfies(verConstraint)) {
+                    continue;
+                }
+            }
             fields.add(MappingTranslator.remapFieldName(className, field[0], field[1]));
         }
 
+        List<String> presentFields = new ArrayList<>();
         node.fields.removeIf(field -> {
             if (fields.contains(field.name)) {
                 if (Config.getInstance().debug()) {
                     STRIPPER_LOGGER.info("Stripped field: {}", field.name);
                 }
+                presentFields.add(field.name);
                 return true;
             }
             return false;
         });
 
         String internalName = node.name.replace('.', '/');
-        stripStaticFieldInitializers(node, fields, internalName);
-        removeStaticFieldUsagesInClinit(node, fields, internalName);
+        stripStaticFieldInitializers(node, presentFields, internalName);
+        removeStaticFieldUsagesInClinit(node, presentFields, internalName);
 
         if (Config.getInstance().debug()) {
             STRIPPER_LOGGER.info("Finished Stripping Process");
         }
     }
 
+    private static Version getMcVer() {
+        String mcVerRaw = FabricLoader.getInstance().getRawGameVersion();
+        if (countChar(mcVerRaw, '.') != 2) {
+            mcVerRaw += ".0";
+        }
+        return Version.parse(mcVerRaw);
+    }
+
+    private static int countChar(String s, char target) {
+        int count = 0;
+        for (int i = 0; i < s.length(); i++) {
+            if (s.charAt(i) == target) {
+                count++;
+            }
+        }
+        return count;
+    }
+
     private static void stripStaticFieldInitializers(ClassNode classNode, List<String> strippedFieldNames, String internalClassName) {
         for (MethodNode method : classNode.methods) {
-            if (!method.name.equals("<clinit>")) continue;
+            if (!method.name.equals("<clinit>")) {
+                continue;
+            }
 
             InsnList instructions = method.instructions;
             List<AbstractInsnNode> toRemove = new ArrayList<>();
@@ -104,7 +135,9 @@ public class FieldStripper {
 
     private static void removeStaticFieldUsagesInClinit(ClassNode classNode, List<String> strippedFields, String internalName) {
         for (MethodNode method : classNode.methods) {
-            if (!method.name.equals("<clinit>")) continue;
+            if (!method.name.equals("<clinit>")) {
+                continue;
+            }
 
             InsnList insns = method.instructions;
             ListIterator<AbstractInsnNode> it = insns.iterator();

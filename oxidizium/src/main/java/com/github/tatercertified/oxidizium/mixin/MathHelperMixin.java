@@ -20,8 +20,8 @@ public class MathHelperMixin {
      */
     @IfMinecraftVersion(minVersion = "1.21.11")
     @IfBoolean(booleanPath = "com.github.tatercertified.oxidizium.Config", booleanMethodName = "isLithiumOptimizationEnabled", negate = true)
-    @Overwrite
-    public static float sin(double value) {
+    @Overwrite(aliases = "method_15374")
+    public static float method_15374(double value) {
         return MTH.sin(value);
     }
 
@@ -32,7 +32,7 @@ public class MathHelperMixin {
     @IfMinecraftVersion(minVersion = "1.21.11")
     @IfBoolean(booleanPath = "com.github.tatercertified.oxidizium.Config", booleanMethodName = "isLithiumOptimizationEnabled", negate = true)
     @Overwrite
-    public static float cos(double value) {
+    public static float method_15362(double value) {
         return MTH.cos(value);
     }
 
@@ -43,7 +43,7 @@ public class MathHelperMixin {
     @IfMinecraftVersion(maxVersion = "1.21.10")
     @IfBoolean(booleanPath = "com.github.tatercertified.oxidizium.Config", booleanMethodName = "isLithiumOptimizationEnabled", negate = true)
     @Overwrite
-    public static float sin(float value) {
+    public static float method_15374(float value) {
         return MTH.sin(value);
     }
 
@@ -54,7 +54,7 @@ public class MathHelperMixin {
     @IfMinecraftVersion(maxVersion = "1.21.10")
     @IfBoolean(booleanPath = "com.github.tatercertified.oxidizium.Config", booleanMethodName = "isLithiumOptimizationEnabled", negate = true)
     @Overwrite
-    public static float cos(float value) {
+    public static float method_15362(float value) {
         return MTH.cos(value);
     }
 
@@ -64,7 +64,7 @@ public class MathHelperMixin {
      */
     // @Config(name = "sqrt")
     @Overwrite
-    public static float sqrt(@PositiveOnly float value) {
+    public static float method_15355(@PositiveOnly float value) {
         return MTH.sqrt(value);
     }
 
@@ -186,7 +186,7 @@ public class MathHelperMixin {
     // @Config(name = "double clamped lerp")
     @Overwrite
     public static double clampedLerp(double delta, double start, double end) {
-        return MTH.clampedLerp(start, end, delta);
+        return MTH.clampedLerp(delta, start, end);
     }
 
     /**
@@ -197,7 +197,7 @@ public class MathHelperMixin {
     @IfMinecraftVersion(minVersion = "1.17.1")
     @Overwrite
     public static float clampedLerp(float delta, float start, float end) {
-        return MTH.clampedLerp(start, end, delta);
+        return MTH.clampedLerp(delta, start, end);
     }
 
     /**
@@ -245,6 +245,7 @@ public class MathHelperMixin {
      * @reason Implement in Rust
      */
     // @Config(name = "floor div")
+    @IfMinecraftVersion(minVersion = "1.19.4")
     @Overwrite
     public static int floorDiv(int dividend, @NonZero int divisor) {
         return MTH.floorDiv(dividend, divisor);
@@ -307,7 +308,7 @@ public class MathHelperMixin {
      * @reason Implement in Rust
      */
     // @Config(name = "is multiple of")
-    @IfMinecraftVersion(minVersion = "1.19.3")
+    @IfMinecraftVersion(minVersion = "1.19.4")
     @Overwrite
     public static boolean isMultipleOf(int a, @NonZero int b) {
         return MTH.isMultipleOf(a, b);
@@ -511,9 +512,9 @@ public class MathHelperMixin {
      * @author QPCrummer
      * @reason Implement in Rust
      */
-    @IfMinecraftVersion(maxVersion = "1.21.1")
+    @IfMinecraftVersion(minVersion = "1.19.4", maxVersion = "1.21.1")
     @Overwrite
-    public static int packRgb(float r, float g, float b) {
+    public static int method_15353(@Bounded(minInclusive = 0.0, maxExclusive = 1.0) float r,@Bounded(minInclusive = 0.0, maxExclusive = 1.0) float g,@Bounded(minInclusive = 0.0, maxExclusive = 1.0) float b) {
         return MTH.packRgb(r, g, b);
     }
 
@@ -613,7 +614,7 @@ public class MathHelperMixin {
      */
     @Deprecated
     @Overwrite
-    public static double fastInverseSqrt(double x) {
+    public static double fastInverseSqrt(@Bounded(minInclusive = 1, maxExclusive = 100) double x) {
         return MTH.fastInverseSqrt(x);
     }
 
@@ -623,7 +624,7 @@ public class MathHelperMixin {
      */
     @IfMinecraftVersion(minVersion = "1.15", maxVersion = "1.19.3")
     @Overwrite
-    public static float fastInverseSqrt(float x) {
+    public static float method_22858(@Bounded(minInclusive = 1, maxExclusive = 100) float x) {
         return MTH.fastInverseSqrt(x);
     }
 
@@ -1000,7 +1001,7 @@ public class MathHelperMixin {
      */
     @IfMinecraftVersion(minVersion = "1.17", maxVersion = "1.17.1")
     @Overwrite
-    public static double magnitude(int a, double b, int c) {
+    public static double method_33825(int a, double b, int c) {
         return MTH.magnitude(a, b, c);
     }
 

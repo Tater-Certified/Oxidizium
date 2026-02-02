@@ -9,7 +9,7 @@ public final class Cleanup {
             {"field_15727", double[].class.descriptorString()},
             {"field_15722", double[].class.descriptorString()},
             {"field_15725", float[].class.descriptorString()},
-            {"field_15723", int[].class.descriptorString()},
+            {"field_15723", int[].class.descriptorString(), ">1.17.1"},
             {"field_29852", long.class.descriptorString()},
             {"field_29853", long.class.descriptorString()},
             {"field_29854", long.class.descriptorString()},

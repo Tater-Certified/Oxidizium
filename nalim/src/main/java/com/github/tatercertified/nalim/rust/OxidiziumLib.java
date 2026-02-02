@@ -54,10 +54,10 @@ public class OxidiziumLib {
     public static native double clamp_double(double value, double min, double max);
 
     @Link
-    public static native double clamp_lerp_double(double delta, double start, double end);
+    public static native double clamp_lerp_double(double start, double end, double delta);
 
     @Link
-    public static native float clamp_lerp_float(float delta, float start, float end);
+    public static native float clamp_lerp_float(float start, float end, float delta);
 
     @Link
     public static native int abs_max_int(int i, int j);

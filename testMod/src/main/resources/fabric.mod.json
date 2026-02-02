@@ -27,6 +27,6 @@
 
   "depends": {
     "fabricloader": "*",
-    "oxidizium": "*"
+    "oxidizium_base": "*"
   }
 }

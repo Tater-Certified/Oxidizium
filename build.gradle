@@ -29,6 +29,7 @@ subprojects {
         modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
         include(implementation 'org.joml:joml:1.10.8')
         include(implementation 'com.github.Tater-Certified:MixinConstraints:4856759a06')
+        include(implementation "com.github.zafarkhaja:java-semver:0.10.2")
     }
 }
 

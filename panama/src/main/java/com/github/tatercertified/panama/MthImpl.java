@@ -86,12 +86,12 @@ public class MthImpl implements Mth {
 
     @Override
     public double clampedLerp(double delta, double start, double end) {
-        return lib_h.clamp_lerp_double(start, end, delta);
+        return lib_h.clamp_lerp_double(delta, start, end);
     }
 
     @Override
     public float clampedLerp(float delta, float start, float end) {
-        return lib_h.clamp_lerp_float(start, end, delta);
+        return lib_h.clamp_lerp_float(delta, start, end);
     }
 
     @Override
