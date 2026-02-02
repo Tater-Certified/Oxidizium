@@ -9,6 +9,7 @@ dependencies {
     // include(implementation 'com.github.Tater-Certified:MixinConfig:c4c71652bb')
     include(implementation(annotationProcessor("com.github.bawnorton.mixinsquared:mixinsquared-fabric:0.3.3")))
     modImplementation "maven.modrinth:lithium:mc1.21.11-0.21.0-fabric"
+    include(implementation("org.slf4j:slf4j-api:2.0.17"))
 }
 
 processResources {
