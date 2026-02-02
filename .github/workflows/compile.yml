@@ -10,7 +10,7 @@ jobs:
   rust_linux_x86:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
     - name: Build x86
       run: |
         cd native
@@ -18,12 +18,12 @@ jobs:
     - name: Rename
       run: mv native/target/release/liboxidizium.so liboxidizium_linux_x86.so
     - name: Upload
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         name: liboxidizium_linux_x86.so
         path: liboxidizium_linux_x86.so
     - name: Upload C Header File
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         name: lib.h
         path: native/lib.h
@@ -31,7 +31,7 @@ jobs:
   rust_linux_arm:
     runs-on: ubuntu-24.04-arm
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
     - name: Build arm
       run: |
         cd native
@@ -39,7 +39,7 @@ jobs:
     - name: Rename
       run: mv native/target/release/liboxidizium.so liboxidizium_linux_arm64.so
     - name: Upload
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         name: liboxidizium_linux_arm64.so
         path: liboxidizium_linux_arm64.so
@@ -47,7 +47,7 @@ jobs:
   rust_windows_x86:
     runs-on: windows-latest
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
     - name: Build x86
       run: |
         cd native
@@ -55,7 +55,7 @@ jobs:
     - name: Rename
       run: mv native/target/release/oxidizium.dll oxidizium_windows_x86.dll
     - name: Upload
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         name: oxidizium_windows_x86.dll
         path: oxidizium_windows_x86.dll
@@ -63,7 +63,7 @@ jobs:
   rust_windows_arm:
     runs-on: windows-11-arm
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
     - uses: actions-rust-lang/setup-rust-toolchain@v1
     - name: Build arm
       run: |
@@ -72,7 +72,7 @@ jobs:
     - name: Rename
       run: mv native/target/release/oxidizium.dll oxidizium_windows_arm64.dll
     - name: Upload
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         name: oxidizium_windows_arm64.dll
         path: oxidizium_windows_arm64.dll
@@ -80,7 +80,7 @@ jobs:
   rust_macos_x86:
     runs-on: macos-15-intel
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
     - name: Build x86
       run: |
         cd native
@@ -88,7 +88,7 @@ jobs:
     - name: Rename
       run: mv native/target/release/liboxidizium.dylib liboxidizium_mac_x86.dylib
     - name: Upload
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         name: liboxidizium_mac_x86.dylib
         path: liboxidizium_mac_x86.dylib
@@ -104,7 +104,7 @@ jobs:
     - name: Rename
       run: mv native/target/release/liboxidizium.dylib liboxidizium_mac_arm64.dylib
     - name: Upload
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         name: liboxidizium_mac_arm64.dylib
         path: liboxidizium_mac_arm64.dylib
@@ -115,7 +115,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: Download Rust binaries
-      uses: actions/download-artifact@v4
+      uses: actions/download-artifact@v7
       with:
         path: /home/runner/work/Oxidizium/Oxidizium
         merge-multiple: true
@@ -133,45 +133,32 @@ jobs:
           lib.h
         failOnError: false
 
-    - name: Make Gradlew Executable
-      run: chmod +x gradlew
-    - name: Validate the Gradle Wrapper
-      uses: gradle/actions/wrapper-validation@v4
-    - name: Setup JDK
-      uses: actions/setup-java@v4
-      with:
-        distribution: 'temurin'
-        java-version: 22
+  gradle-builds:
+    needs: oxidizium
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        module: [ panama, nalim, testMod ]
+    steps:
+      - uses: actions/checkout@v6
 
-    - name: Compile Oxidizium-Panama
-      run: ./gradlew :panama:build --no-daemon
+      - name: Setup JDK
+        uses: actions/setup-java@v5
+        with:
+          distribution: 'temurin'
+          java-version: 22
 
-    - name: Upload Oxidizium-Panama
-      uses: actions/upload-artifact@v4
-      with:
-        name: Oxidizium-Panama
-        path: |
-          panama/build/libs/*.jar
-          !panama/build/libs/*-sources.jar
-        compression-level: 0
+      - name: Make Gradlew Executable
+        run: chmod +x gradlew
 
-    - name: Compile Oxidizium-Nalim
-      run: ./gradlew :nalim:build --no-daemon
+      - name: Build Module
+        run: ./gradlew :${{ matrix.module }}:build --no-daemon
 
-    - name: Upload Oxidizium-Nalim
-      uses: actions/upload-artifact@v4
-      with:
-        name: Oxidizium
-        path: |
-          nalim/build/libs/*.jar
-          !nalim/build/libs/*-sources.jar
-        compression-level: 0
-
-    - name: Upload Oxidizium Tester
-      uses: actions/upload-artifact@v4
-      with:
-        name: Oxidizium-Tester
-        path: |
-          testMod/build/libs/*.jar
-          !testMod/build/libs/*-sources.jar
-        compression-level: 0
+      - name: Upload Module Artifact
+        uses: actions/upload-artifact@v6
+        with:
+          name: oxidizium-${{ matrix.module }}
+          path: |
+            ${{ matrix.module }}/build/libs/*.jar
+            !${{ matrix.module }}/build/libs/*-sources.jar
+          compression-level: 0
