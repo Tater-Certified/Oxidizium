@@ -15,8 +15,8 @@ public class OxidiziumMixinPlugin implements IMixinConfigPlugin {
 
     @Override
     public void onLoad(String s) {
-        LoadRustBinary.onPreLaunch();
         Config.init();
+        LoadRustBinary.onPreLaunch();
         this.mixinPackage = s;
         MixinConstraintsBootstrap.init(mixinPackage);
     }

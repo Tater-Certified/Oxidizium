@@ -14,7 +14,7 @@
     "icon": "assets/oxidizium/icon.png",
     "environment": "*",
     "mixins": [
-        "oxidizium.mixins.json"
+        "oxidizium_panama.mixins.json"
     ],
     "depends": {
         "fabricloader": "*",

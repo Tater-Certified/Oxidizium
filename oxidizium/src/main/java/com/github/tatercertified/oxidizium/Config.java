@@ -1,6 +1,5 @@
 package com.github.tatercertified.oxidizium;
 
-import com.github.tatercertified.oxidizium.utils.backend.Backend;
 import com.github.tatercertified.oxidizium.utils.backend.BackendType;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.impl.FabricLoaderImpl;

@@ -360,6 +360,12 @@ tasks.register("copyOxidiziumResources") {
             jsonContent.remove("entrypoints")
             if (targetDir.getAbsolutePath().contains("nalim")) {
                 jsonContent.remove("mixins")
+            } else if (jsonContent.mixins instanceof List) {
+                jsonContent.mixins = jsonContent.mixins.collect { mixin ->
+                    mixin == "oxidizium.mixins.json"
+                            ? "oxidizium_panama.mixins.json"
+                            : mixin
+                }
             }
             jsonContent.remove("custom")
 
