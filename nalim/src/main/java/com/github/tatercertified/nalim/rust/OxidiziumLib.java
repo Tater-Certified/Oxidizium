@@ -2,9 +2,14 @@ package com.github.tatercertified.nalim.rust;
 
 import one.nalim.Library;
 import one.nalim.Link;
+import one.nalim.Linker;
 
 @Library("oxidizium")
 public class OxidiziumLib {
+    static {
+        Linker.linkClass(OxidiziumLib.class);
+    }
+
     @Link
     public static native float sin_float(float value);
 

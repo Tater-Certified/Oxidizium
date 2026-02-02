@@ -47,10 +47,10 @@ public class LoadRustBinary {
 
         String binaryNameNoExtension = FilenameUtils.removeExtension(binaryName);
 
-        Path output = copyNativeLib(binaryName, outputName, binaryNameNoExtension);
-
         if (Config.isNalim()) {
-            System.load(output.toAbsolutePath().toString());
+            copyNativeLibToMinecraftLibs(binaryName, outputName, binaryNameNoExtension);
+        } else {
+            copyNativeLib(binaryName, outputName, binaryNameNoExtension);
         }
     }
 
@@ -58,7 +58,7 @@ public class LoadRustBinary {
         return Paths.get("").toAbsolutePath();
     }
 
-    private static Path copyNativeLib(String binaryName, String outputName, String binaryNameNoExt) {
+    private static void copyNativeLib(String binaryName, String outputName, String binaryNameNoExt) {
         try (InputStream inputStream = LoadRustBinary.class.getResourceAsStream("/" + binaryName)) {
             if (inputStream == null) {
                 throw new RuntimeException("Resource not found: /" + binaryName);
@@ -70,7 +70,39 @@ public class LoadRustBinary {
             if (Files.notExists(destinationPath) || !HashUtils.checkHash(destinationPath, binaryNameNoExt)) {
                 Files.copy(inputStream, destinationPath, StandardCopyOption.REPLACE_EXISTING);
             }
-            return destinationPath;
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private static Path getMinecraftLibrariesDir() {
+        // Fabric / Minecraft root usually uses "libraries" folder
+        // Adjust this if using a custom launcher folder
+        Path mcRoot = Paths.get("").toAbsolutePath(); // current working directory
+        Path libsDir = mcRoot.resolve("libraries").resolve("oxidizium");
+        try {
+            Files.createDirectories(libsDir);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to create libraries/oxidizium directory", e);
+        }
+        return libsDir;
+    }
+
+    private static void copyNativeLibToMinecraftLibs(String binaryName, String outputName, String binaryNameNoExt) {
+        try (InputStream inputStream = LoadRustBinary.class.getResourceAsStream("/" + binaryName)) {
+            if (inputStream == null) {
+                throw new RuntimeException("Resource not found: /" + binaryName);
+            }
+
+            Path libsDir = getMinecraftLibrariesDir();
+            int lastDotIndex = binaryName.lastIndexOf('.');
+            String extension = binaryName.substring(lastDotIndex + 1);
+
+            Path destinationPath = libsDir.resolve(outputName + "." + extension);
+
+            if (Files.notExists(destinationPath) || !HashUtils.checkHash(destinationPath, binaryNameNoExt)) {
+                Files.copy(inputStream, destinationPath, StandardCopyOption.REPLACE_EXISTING);
+            }
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

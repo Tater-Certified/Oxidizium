@@ -143,16 +143,28 @@ jobs:
         distribution: 'temurin'
         java-version: 22
 
-    - name: Compile Oxidizium Projects
-      run: ./gradlew :testMod:build --no-daemon
+    - name: Compile Oxidizium-Panama
+      run: ./gradlew :panama:build --no-daemon
 
-    - name: Upload Oxidizium
+    - name: Upload Oxidizium-Panama
+      uses: actions/upload-artifact@v4
+      with:
+        name: Oxidizium-Panama
+        path: |
+          panama/build/libs/*.jar
+          !panama/build/libs/*-sources.jar
+        compression-level: 0
+
+    - name: Compile Oxidizium-Nalim
+      run: ./gradlew :nalim:build --no-daemon
+
+    - name: Upload Oxidizium-Nalim
       uses: actions/upload-artifact@v4
       with:
         name: Oxidizium
         path: |
-          oxidizium/build/libs/*.jar
-          !oxidizium/build/libs/*-sources.jar
+          nalim/build/libs/*.jar
+          !nalim/build/libs/*-sources.jar
         compression-level: 0
 
     - name: Upload Oxidizium Tester

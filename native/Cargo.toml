@@ -17,3 +17,5 @@ cbindgen = "0.29.2"
 codegen-units = 1
 lto = "fat"
 panic = "abort"
+opt-level = 3
+strip = "symbols"
