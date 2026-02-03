@@ -105,4 +105,8 @@ public record Config(String version, boolean debug, boolean test, boolean reduce
     public static boolean isPanama() {
         return Oxidizium.BACKEND.backendType() == BackendType.Panama;
     }
+
+    public static boolean isMembrane() {
+        return Oxidizium.BACKEND.backendType() == BackendType.Membrane;
+    }
 }

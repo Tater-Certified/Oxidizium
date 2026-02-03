@@ -47,7 +47,7 @@ public class LoadRustBinary {
 
         String binaryNameNoExtension = FilenameUtils.removeExtension(binaryName);
 
-        if (Config.isNalim()) {
+        if (Config.isNalim() || Config.isMembrane()) {
             copyNativeLibToMinecraftLibs(binaryName, outputName, binaryNameNoExtension);
         } else {
             copyNativeLib(binaryName, outputName, binaryNameNoExtension);
@@ -102,6 +102,10 @@ public class LoadRustBinary {
 
             if (Files.notExists(destinationPath) || !HashUtils.checkHash(destinationPath, binaryNameNoExt)) {
                 Files.copy(inputStream, destinationPath, StandardCopyOption.REPLACE_EXISTING);
+            }
+
+            if (Config.isMembrane()) {
+                System.loadLibrary("oxidizium");
             }
         } catch (IOException e) {
             throw new RuntimeException(e);

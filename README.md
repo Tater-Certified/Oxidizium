@@ -18,7 +18,7 @@ As of now, Oxidizium is very compatible with the majority of mods, with specific
 ---
 
 ## Backends
-Oxidizium comes with 2 backends by default: Panama and Nalim. The backend will be in the jar and mod name.
+Oxidizium comes with 3 backends by default: Panama, Nalim, and Membrane. The backend will be in the jar and mod name.
 Each backend has its own pros and cons. Read about them below:
 
 ### Project Panama
@@ -56,10 +56,27 @@ net.fabricmc.loader.impl.launch.server.FabricServerLauncher nogui
 ```
 Feel free to change the RAM amount `-Xmx2G` and add more JVM arguments.
 
+### Membrane
+Membrane works similar to Nalim except the installation process is streamlined.
+Like Nalim, it requires Java 20 or below.
+You still need to use the arguments from Nalim, but there is no longer a need for a java agent:
+
+```markdown
+java -Xmx2G -XX:+UnlockExperimentalVMOptions -XX:+EnableJVMCI \
+--add-exports=jdk.internal.vm.ci/jdk.vm.ci.code=ALL-UNNAMED \
+--add-exports=jdk.internal.vm.ci/jdk.vm.ci.code.site=ALL-UNNAMED \
+--add-exports=jdk.internal.vm.ci/jdk.vm.ci.hotspot=ALL-UNNAMED \
+--add-exports=jdk.internal.vm.ci/jdk.vm.ci.meta=ALL-UNNAMED \
+--add-exports=jdk.internal.vm.ci/jdk.vm.ci.runtime=ALL-UNNAMED \
+-Djava.library.path=./libraries/oxidizium \
+-jar fabric-server-launch.jar \
+ nogui
+```
+Feel free to change the RAM amount `-Xmx2G` and add more JVM arguments.
 ---
 
 ## Testing
-The `Oxidizium-Tester` mod is a utility mod that can be loaded **with** `Oxidizium` (either backend is fine). It will create a GUI on startup instead
+The `Oxidizium-Tester` mod is a utility mod that can be loaded **with** `Oxidizium` (any backend is fine). It will create a GUI on startup instead
 of launching the vanilla game. In this GUI, the user can input how many "runs" (trials) to execute. Pressing "Run" will run the desired
 amount of runs and report back any feedback on the left pane. If there happens to be a serious error in the program, the program will crash
 and a Rust debug log will be printed in the console.<p>
