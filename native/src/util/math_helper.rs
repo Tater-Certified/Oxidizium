@@ -2,6 +2,10 @@ use once_cell::sync::Lazy;
 use std::ffi::c_ushort;
 use std::num::Wrapping;
 use std::slice;
+use mimalloc::MiMalloc;
+
+#[global_allocator]
+static GLOBAL: MiMalloc = MiMalloc;
 
 const APPROXIMATION_THRESHOLD: f32 = 1.0E-5;
 const MULTIPLY_DE_BRUIJN_BIT_POS: [i8; 32] = [
