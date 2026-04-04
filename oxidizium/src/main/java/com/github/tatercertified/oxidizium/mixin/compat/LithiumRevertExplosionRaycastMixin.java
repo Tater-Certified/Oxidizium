@@ -11,15 +11,15 @@ import org.spongepowered.asm.mixin.injection.Redirect;
         @IfBoolean(booleanPath = "com.github.tatercertified.oxidizium.Config", booleanMethodName = "isLithiumOptimizationEnabled"),
         @IfBoolean(booleanPath = "com.github.tatercertified.oxidizium.Config", booleanMethodName = "isTestingEnabled", negate = true)
 })
-@Mixin(targets = "net.minecraft.world.explosion.ExplosionImpl", priority = 1500)
+@Mixin(targets = "net.minecraft.world.level.ServerExplosion", priority = 1500)
 public class LithiumRevertExplosionRaycastMixin {
     @TargetHandler(
             mixin = "net.caffeinemc.mods.lithium.mixin.world.explosions.block_raycast.ServerExplosionMixin",
             name = "performRayCast"
     )
-    @Redirect(method = "@MixinSquared:Handler", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/math/MathHelper;floor(D)I"))
-    private int oxidizium$useVanillaMethod(double value) {
-        int i = (int)value;
-        return value < (double)i ? i - 1 : i;
+    @Redirect(method = "@MixinSquared:Handler", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/Mth;floor(D)I"))
+    private int oxidizium$useVanillaMethod(double v) {
+        int i = (int) v;
+        return v < (double)i ? i - 1 : i;
     }
 }

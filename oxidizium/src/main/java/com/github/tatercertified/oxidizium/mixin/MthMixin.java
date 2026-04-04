@@ -3,7 +3,7 @@ package com.github.tatercertified.oxidizium.mixin;
 import com.github.tatercertified.oxidizium.utils.annotation.*;
 import com.moulberry.mixinconstraints.annotations.IfBoolean;
 import com.moulberry.mixinconstraints.annotations.IfMinecraftVersion;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.Mth;
 import org.apache.commons.lang3.math.Fraction;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -12,8 +12,8 @@ import static com.github.tatercertified.oxidizium.Oxidizium.MTH;
 
 // @Config(name = "Native Math")
 @IfBoolean(booleanPath = "com.github.tatercertified.oxidizium.Config", booleanMethodName = "isTestingEnabled", negate = true)
-@Mixin(MathHelper.class)
-public class MathHelperMixin {
+@Mixin(Mth.class)
+public class MthMixin {
     /**
      * @author QPCrummer
      * @reason Implement in Rust
@@ -21,7 +21,7 @@ public class MathHelperMixin {
     @IfMinecraftVersion(minVersion = "1.21.11")
     @IfBoolean(booleanPath = "com.github.tatercertified.oxidizium.Config", booleanMethodName = "isLithiumOptimizationEnabled", negate = true)
     @Overwrite(aliases = "method_15374")
-    public static float method_15374(double value) {
+    public static float sin(double value) {
         return MTH.sin(value);
     }
 
@@ -32,7 +32,7 @@ public class MathHelperMixin {
     @IfMinecraftVersion(minVersion = "1.21.11")
     @IfBoolean(booleanPath = "com.github.tatercertified.oxidizium.Config", booleanMethodName = "isLithiumOptimizationEnabled", negate = true)
     @Overwrite
-    public static float method_15362(double value) {
+    public static float cos(double value) {
         return MTH.cos(value);
     }
 
@@ -64,7 +64,7 @@ public class MathHelperMixin {
      */
     // @Config(name = "sqrt")
     @Overwrite
-    public static float method_15355(@PositiveOnly float value) {
+    public static float sqrt(@PositiveOnly float value) {
         return MTH.sqrt(value);
     }
 
@@ -206,7 +206,7 @@ public class MathHelperMixin {
      */
     @IfMinecraftVersion(minVersion = "1.21.11")
     @Overwrite
-    public static int method_76800(int i, int j) {
+    public static int absMax(int i, int j) {
         return MTH.method_76800(i, j);
     }
 
@@ -216,7 +216,7 @@ public class MathHelperMixin {
      */
     @IfMinecraftVersion(minVersion = "1.21.11")
     @Overwrite
-    public static float method_76799(float f, float g) {
+    public static float absMax(float f, float g) {
         return MTH.method_76799(f, g);
     }
 
@@ -226,7 +226,7 @@ public class MathHelperMixin {
      */
     @IfMinecraftVersion(minVersion = "1.21.11")
     @Overwrite
-    public static int method_76801(int i, int j, int k, int l) {
+    public static int chessboardDistance(int i, int j, int k, int l) {
         return MTH.method_76801(i, j, k, l);
     }
 
@@ -258,7 +258,7 @@ public class MathHelperMixin {
     // @Config(name = "float approx eq")
     @IfMinecraftVersion(minVersion = "1.14.4")
     @Overwrite
-    public static boolean approximatelyEquals(float a, float b) {
+    public static boolean equal(float a, float b) {
         return MTH.approximatelyEquals(a, b);
     }
 
@@ -269,7 +269,7 @@ public class MathHelperMixin {
     // @Config(name = "double approx eq")
     @IfMinecraftVersion(minVersion = "1.15")
     @Overwrite
-    public static boolean approximatelyEquals(double a, double b) {
+    public static boolean equal(double a, double b) {
         return MTH.approximatelyEquals(a, b);
     }
 
@@ -279,7 +279,7 @@ public class MathHelperMixin {
      */
     // @Config(name = "int floor mod")
     @Overwrite
-    public static int floorMod(int dividend, @NonZero int divisor) {
+    public static int positiveModulo(int dividend, @NonZero int divisor) {
         return MTH.floorMod(dividend, divisor);
     }
 
@@ -289,7 +289,7 @@ public class MathHelperMixin {
      */
     // @Config(name = "float floor mod")
     @Overwrite
-    public static float floorMod(float dividend, @NonZero float divisor) {
+    public static float positiveModulo(float dividend, @NonZero float divisor) {
         return MTH.floorMod(dividend, divisor);
     }
 
@@ -299,7 +299,7 @@ public class MathHelperMixin {
      */
     // @Config(name = "double floor mod")
     @Overwrite
-    public static double floorMod(double dividend, @NonZero double divisor) {
+    public static double positiveModulo(double dividend, @NonZero double divisor) {
         return MTH.floorMod(dividend, divisor);
     }
 
@@ -383,7 +383,7 @@ public class MathHelperMixin {
      */
     // @Config(name = "subtract angles")
     @Overwrite
-    public static float subtractAngles(float start, float end) {
+    public static float degreesDifference(float start, float end) {
         return MTH.subtractAngles(start, end);
     }
 
@@ -393,7 +393,7 @@ public class MathHelperMixin {
      */
     // @Config(name = "angle between")
     @Overwrite
-    public static float angleBetween(float first, float second) {
+    public static float degreesDifferenceAbs(float first, float second) {
         return MTH.angleBetween(first, second);
     }
 
@@ -404,7 +404,7 @@ public class MathHelperMixin {
     // @Config(name = "clamp angle")
     @IfMinecraftVersion(minVersion = "1.18")
     @Overwrite
-    public static float clampAngle( float value, float mean, float delta) {
+    public static float rotateIfNecessary(float value, float mean, float delta) {
         return MTH.clampAngle(value, mean, delta);
     }
 
@@ -415,7 +415,7 @@ public class MathHelperMixin {
     // @Config(name = "step towards")
     @IfMinecraftVersion(minVersion = "1.16")
     @Overwrite
-    public static float stepTowards(float from, float to, float step) {
+    public static float approach(float from, float to, float step) {
         return MTH.stepTowards(from, to, step);
     }
 
@@ -426,7 +426,7 @@ public class MathHelperMixin {
     // @Config(name = "step unwrapped towards")
     @IfMinecraftVersion(minVersion = "1.16")
     @Overwrite
-    public static float stepUnwrappedAngleTowards(float from, float to, float step) {
+    public static float approachDegrees(float from, float to, float step) {
         return MTH.stepUnwrappedAngleTowards(from, to, step);
     }
 
@@ -462,7 +462,7 @@ public class MathHelperMixin {
     // @Config(name = "smallest square side len")
     @IfMinecraftVersion(minVersion = "1.21.6")
     @Overwrite
-    public static int smallestEncompassingSquareSideLength(@PositiveOnly int value) {
+    public static int smallestSquareSide(@PositiveOnly int value) {
         return MTH.smallestEncompassingSquareSideLength(value);
     }
 
@@ -483,7 +483,7 @@ public class MathHelperMixin {
     // @Config(name = "ceil log 2")
     @IfMinecraftVersion(minVersion = "1.18")
     @Overwrite
-    public static int ceilLog2(int value) {
+    public static int ceillog2(int value) {
         return MTH.ceilLog2(value);
     }
 
@@ -494,7 +494,7 @@ public class MathHelperMixin {
     // @Config(name = "floor log 2")
     @IfMinecraftVersion(minVersion = "1.18.1")
     @Overwrite
-    public static int floorLog2(int value) {
+    public static int log2(int value) {
         return MTH.floorLog2(value);
     }
 
@@ -527,7 +527,7 @@ public class MathHelperMixin {
     // @Config(name = "float fraction")
     @IfMinecraftVersion(minVersion = "1.15")
     @Overwrite
-    public static float fractionalPart(float value) {
+    public static float frac(float value) {
         return MTH.fractionalPart(value);
     }
 
@@ -539,7 +539,7 @@ public class MathHelperMixin {
      */
     // @Config(name = "double fraction")
     @Overwrite
-    public static double fractionalPart(double value) {
+    public static double frac(double value) {
         return MTH.fractionalPart(value);
     }
 
@@ -550,7 +550,7 @@ public class MathHelperMixin {
     // @Config(name = "hashcode")
     @Deprecated
     @Overwrite
-    public static long hashCode(int x, int y, int z) {
+    public static long getSeed(int x, int y, int z) {
         return MTH.hashCode(x, y, z);
     }
 
@@ -561,7 +561,7 @@ public class MathHelperMixin {
     // @Config(name = "double get lerp")
     @IfMinecraftVersion(minVersion = "1.16")
     @Overwrite
-    public static double getLerpProgress(double value, double start, double end) {
+    public static double inverseLerp(double value, double start, double end) {
         return MTH.getLerpProgress(value, start, end);
     }
 
@@ -572,7 +572,7 @@ public class MathHelperMixin {
     // @Config(name = "float get lerp")
     @IfMinecraftVersion(minVersion = "1.18")
     @Overwrite
-    public static float getLerpProgress(float value, float start, float end) {
+    public static float inverseLerp(float value, float start, float end) {
         return MTH.getLerpProgress(value, start, end);
     }
 
@@ -593,7 +593,7 @@ public class MathHelperMixin {
     // @Config(name = "float inverse sqrt")
     @IfMinecraftVersion(minVersion = "1.19.4")
     @Overwrite
-    public static float inverseSqrt(@Bounded(minInclusive = 1, maxExclusive = 100) float x) {
+    public static float invSqrt(@Bounded(minInclusive = 1, maxExclusive = 100) float x) {
         return MTH.inverseSqrt(x);
     }
 
@@ -604,7 +604,7 @@ public class MathHelperMixin {
     // @Config(name = "double inverse sqrt")
     @IfMinecraftVersion(minVersion = "1.19.4")
     @Overwrite
-    public static double inverseSqrt(@Bounded(minInclusive = 1, maxExclusive = 100) double x) {
+    public static double invSqrt(@Bounded(minInclusive = 1, maxExclusive = 100) double x) {
         return MTH.inverseSqrt(x);
     }
 
@@ -614,7 +614,7 @@ public class MathHelperMixin {
      */
     @Deprecated
     @Overwrite
-    public static double fastInverseSqrt(@Bounded(minInclusive = 1, maxExclusive = 100) double x) {
+    public static double fastInvSqrt(@Bounded(minInclusive = 1, maxExclusive = 100) double x) {
         return MTH.fastInverseSqrt(x);
     }
 
@@ -635,7 +635,7 @@ public class MathHelperMixin {
     // @Config(name = "fast inverse cbrt")
     @IfMinecraftVersion(minVersion = "1.15")
     @Overwrite
-    public static float fastInverseCbrt(float x) {
+    public static float fastInvCubeRoot(float x) {
         return MTH.fastInverseCbrt(x);
     }
 
@@ -667,7 +667,7 @@ public class MathHelperMixin {
     // @Config(name = "ideal hash")
     @IfMinecraftVersion(minVersion = "1.15")
     @Overwrite
-    public static int idealHash(int value) {
+    public static int murmurHash3Mixer(int value) {
         return MTH.idealHash(value);
     }
 
@@ -678,7 +678,7 @@ public class MathHelperMixin {
     // @Config(name = "int lerp")
     @IfMinecraftVersion(minVersion = "1.19.4")
     @Overwrite
-    public static int lerp(float delta, int start, int end) {
+    public static int lerpInt(float delta, int start, int end) {
         return MTH.lerp(delta, start, end);
     }
 
@@ -689,7 +689,7 @@ public class MathHelperMixin {
     // @Config(name = "lerp positive")
     @IfMinecraftVersion(minVersion = "1.20.2")
     @Overwrite
-    public static int lerpPositive(float delta, int start, int end) {
+    public static int lerpDiscrete(float delta, int start, int end) {
         return MTH.lerpPositive(delta, start, end);
     }
 
@@ -752,7 +752,7 @@ public class MathHelperMixin {
     // @Config(name = "catmull rom")
     @IfMinecraftVersion(minVersion = "1.19.2")
     @Overwrite
-    public static float catmullRom(float delta, float p0, float p1, float p2, float p3) {
+    public static float catmullrom(float delta, float p0, float p1, float p2, float p3) {
         return MTH.catmullRom(delta, p0, p1, p2, p3);
     }
 
@@ -762,7 +762,7 @@ public class MathHelperMixin {
      */
     // @Config(name = "perlin fade")
     @Overwrite
-    public static double perlinFade(double value) {
+    public static double smoothstep(double value) {
         return MTH.perlinFade(value);
     }
 
@@ -773,7 +773,7 @@ public class MathHelperMixin {
     // @Config(name = "perlin fade derive")
     @IfMinecraftVersion(minVersion = "1.17")
     @Overwrite
-    public static double perlinFadeDerivative(double value) {
+    public static double smoothstepDerivative(double value) {
         return MTH.perlinFadeDerivative(value);
     }
 
@@ -793,7 +793,7 @@ public class MathHelperMixin {
      */
     // @Config(name = "float lerp deg")
     @Overwrite
-    public static float lerpAngleDegrees(float delta, float start, float end) {
+    public static float rotLerp(float delta, float start, float end) {
         return MTH.lerpAngleDegrees(delta, start, end);
     }
 
@@ -804,7 +804,7 @@ public class MathHelperMixin {
     // @Config(name = "double lerp deg")
     @IfMinecraftVersion(minVersion = "1.20.2")
     @Overwrite
-    public static double lerpAngleDegrees(double delta, double start, double end) {
+    public static double rotLerp(double delta, double start, double end) {
         return MTH.lerpAngleDegrees(delta, start, end);
     }
 
@@ -815,7 +815,7 @@ public class MathHelperMixin {
     // @Config(name = "lerp rad")
     @IfMinecraftVersion(minVersion = "1.21.2")
     @Overwrite
-    public static float lerpAngleRadians(float delta, float start, float end) {
+    public static float rotLerpRad(float delta, float start, float end) {
         return MTH.lerpAngleRadians(delta, start, end);
     }
 
@@ -826,7 +826,7 @@ public class MathHelperMixin {
     // @Config(name = "wrap")
     @IfMinecraftVersion(minVersion = "1.17")
     @Overwrite
-    public static float wrap(float value, float maxDeviation) {
+    public static float triangleWave(float value, float maxDeviation) {
         return MTH.wrap(value, maxDeviation);
     }
 
@@ -925,7 +925,7 @@ public class MathHelperMixin {
     // @Config(name = "round up")
     @IfMinecraftVersion(minVersion = "1.16")
     @Overwrite
-    public static int roundUpToMultiple(int value, @NonZero int divisor) {
+    public static int roundToward(int value, @NonZero int divisor) {
         return MTH.roundUpToMultiple(value, divisor);
     }
 
@@ -936,7 +936,7 @@ public class MathHelperMixin {
     // @Config(name = "ceilDiv")
     @IfMinecraftVersion(minVersion = "1.18")
     @Overwrite
-    public static int ceilDiv(int a, @NonZero int b) {
+    public static int positiveCeilDiv(int a, @NonZero int b) {
         return MTH.ceilDiv(a, b);
     }
 
@@ -947,7 +947,7 @@ public class MathHelperMixin {
     // @Config(name = "squared hypot")
     @IfMinecraftVersion(minVersion = "1.18.2")
     @Overwrite
-    public static double squaredHypot(double a, double b) {
+    public static double lengthSquared(double a, double b) {
         return MTH.squaredHypot(a, b);
     }
 
@@ -958,7 +958,7 @@ public class MathHelperMixin {
     // @Config(name = "double hypot")
     @IfMinecraftVersion(minVersion = "1.18")
     @Overwrite
-    public static double hypot(double a, double b) {
+    public static double length(double a, double b) {
         return MTH.hypot(a, b);
     }
 
@@ -969,7 +969,7 @@ public class MathHelperMixin {
     // @Config(name = "float hypot")
     @IfMinecraftVersion(minVersion = "1.21.2")
     @Overwrite
-    public static float hypot(float a, float b) {
+    public static float length(float a, float b) {
         return MTH.hypot(a, b);
     }
 
@@ -980,7 +980,7 @@ public class MathHelperMixin {
     // @Config(name = "squared mag")
     @IfMinecraftVersion(minVersion = "1.18.2")
     @Overwrite
-    public static double squaredMagnitude(double a, double b, double c) {
+    public static double lengthSquared(double a, double b, double c) {
         return MTH.squaredMagnitude(a, b, c);
     }
 
@@ -991,7 +991,7 @@ public class MathHelperMixin {
     // @Config(name = "double mag")
     @IfMinecraftVersion(minVersion = "1.18")
     @Overwrite
-    public static double magnitude(double a, double b, double c) {
+    public static double length(double a, double b, double c) {
         return MTH.magnitude(a, b, c);
     }
 
@@ -1012,7 +1012,7 @@ public class MathHelperMixin {
     // @Config(name = "float mag")
     @IfMinecraftVersion(minVersion = "1.21")
     @Overwrite
-    public static float magnitude(float a, float b, float c) {
+    public static float lengthSquared(float a, float b, float c) {
         return MTH.magnitude(a, b, c);
     }
 
@@ -1023,7 +1023,7 @@ public class MathHelperMixin {
     // @Config(name = "round down")
     @IfMinecraftVersion(minVersion = "1.18")
     @Overwrite
-    public static int roundDownToMultiple(double a, int b) {
+    public static int quantize(double a, int b) {
         return MTH.roundDownToMultiple(a, b);
     }
 
@@ -1043,7 +1043,7 @@ public class MathHelperMixin {
     // @Config(name = "multiply fract")
     @IfMinecraftVersion(minVersion = "1.20.5")
     @Overwrite
-    public static int multiplyFraction(Fraction fraction, int multiplier) {
+    public static int mulAndTruncate(Fraction fraction, int multiplier) {
         return MTH.multiplyFraction(fraction.getNumerator(), fraction.getDenominator(), multiplier);
     }
 }

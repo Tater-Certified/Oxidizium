@@ -5,8 +5,8 @@
   "compatibilityLevel": "JAVA_17",
   "plugin": "com.github.tatercertified.oxidizium.OxidiziumMixinPlugin",
   "mixins": [
-    "MathHelperMixin",
-    "compat.LithiumMathHelperMixin",
+    "MthMixin",
+    "compat.LithiumMthMixin",
     "compat.LithiumRevertExplosionRaycastMixin"
   ],
   "client": [

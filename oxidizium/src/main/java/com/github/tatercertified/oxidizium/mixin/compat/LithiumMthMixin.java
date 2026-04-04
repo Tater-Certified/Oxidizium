@@ -3,7 +3,7 @@ package com.github.tatercertified.oxidizium.mixin.compat;
 import com.moulberry.mixinconstraints.annotations.IfBoolean;
 import com.moulberry.mixinconstraints.annotations.IfBooleans;
 import com.moulberry.mixinconstraints.annotations.IfMinecraftVersion;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.Mth;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 
@@ -13,8 +13,8 @@ import static com.github.tatercertified.oxidizium.Oxidizium.MTH;
         @IfBoolean(booleanPath = "com.github.tatercertified.oxidizium.Config", booleanMethodName = "isLithiumOptimizationEnabled"),
         @IfBoolean(booleanPath = "com.github.tatercertified.oxidizium.Config", booleanMethodName = "isTestingEnabled", negate = true)
 })
-@Mixin(MathHelper.class)
-public class LithiumMathHelperMixin {
+@Mixin(Mth.class)
+public class LithiumMthMixin {
     /**
      * @author QPCrummer
      * @reason Implement in Rust with Lithium compat
