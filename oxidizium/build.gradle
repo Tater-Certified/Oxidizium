@@ -10,6 +10,14 @@ dependencies {
     include(implementation(annotationProcessor("com.github.bawnorton.mixinsquared:mixinsquared-fabric:0.3.3")))
     implementation "maven.modrinth:lithium:mc26.1.1-0.23.0-fabric"
     include(implementation("org.slf4j:slf4j-api:2.0.17"))
+
+    // Check if the membrane project exists in this build execution
+    if (findProject(':membrane') != null) {
+        dependencies {
+            include(runtimeOnly('com.github.RelativityMC:MembraneFFI:cdf326fe7f'))
+            include(runtimeOnly('net.bytebuddy:byte-buddy-agent:1.14.0'))
+        }
+    }
 }
 
 processResources {
