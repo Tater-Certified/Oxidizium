@@ -309,6 +309,7 @@ tasks.register('compileLocally') {
     dependsOn tasks.named('copyOxidiziumResources')
     dependsOn project(':panama').tasks.named('build')
     dependsOn project(':nalim').tasks.named('build')
+    dependsOn project(':membrane').tasks.named('build')
 }
 
 tasks.register('devOxidizumBuild') {
@@ -320,7 +321,8 @@ tasks.register("copyOxidiziumResources") {
     def sourceDir = file("oxidizium/src/main/resources")
     def targets = [
             file("panama/src/main/resources"),
-            file("nalim/src/main/resources")
+            file("nalim/src/main/resources"),
+            file("membrane/src/main/resources")
     ]
 
     doLast {
@@ -400,6 +402,10 @@ project(':nalim').tasks.named('jar').configure {
     mustRunAfter rootProject.tasks.named('hashLib')
 }
 
+project(':membrane').tasks.named('jar').configure {
+    mustRunAfter rootProject.tasks.named('hashLib')
+}
+
 project(":panama") {
     tasks.withType(Jar).configureEach {
         if (name == "sourcesJar") {
@@ -417,6 +423,22 @@ project(":panama") {
 }
 
 project(":nalim") {
+    tasks.withType(Jar).configureEach {
+        if (name == "sourcesJar") {
+            dependsOn rootProject.tasks.named("runJextract")
+        }
+    }
+
+    tasks.named("compileJava").configure {
+        dependsOn rootProject.tasks.named("runJextract")
+    }
+
+    tasks.named('jar').configure {
+        mustRunAfter rootProject.tasks.named('hashLib')
+    }
+}
+
+project(":membrane") {
     tasks.withType(Jar).configureEach {
         if (name == "sourcesJar") {
             dependsOn rootProject.tasks.named("runJextract")

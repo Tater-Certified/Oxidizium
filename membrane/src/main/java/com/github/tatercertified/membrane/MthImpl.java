@@ -1,6 +1,6 @@
 package com.github.tatercertified.membrane;
 
-import com.github.tatercertified.nalim.rust.OxidiziumLib;
+import com.github.tatercertified.membrane.rust.OxidiziumLib;
 import com.github.tatercertified.oxidizium.math.Mth;
 
 public class MthImpl implements Mth {
