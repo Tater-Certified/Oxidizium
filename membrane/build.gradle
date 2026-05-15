@@ -5,10 +5,17 @@ base {
     archivesName = project.archives_base_name
 }
 
+configurations {
+    shadowBundle
+}
+
 dependencies {
     implementation include(project(":oxidizium"))
-    api ('com.github.RelativityMC:MembraneFFI:cdf326fe7f')
-    api ('net.bytebuddy:byte-buddy-agent:1.14.0')
+    implementation ('com.github.RelativityMC:MembraneFFI:cdf326fe7f')
+    implementation ('net.bytebuddy:byte-buddy-agent:1.14.0')
+
+    shadowBundle('com.github.RelativityMC:MembraneFFI:cdf326fe7f')
+    shadowBundle('net.bytebuddy:byte-buddy-agent:1.14.0')
 }
 
 def targetJavaVersion = 17
@@ -54,6 +61,16 @@ java {
 }
 
 jar {
+    from {
+        configurations.shadowBundle.collect { it.isDirectory() ? it : zipTree(it) }
+    } {
+        // Prevent duplicate/conflicting metadata files from shaded libraries
+        exclude "META-INF/*.SF"
+        exclude "META-INF/*.DSA"
+        exclude "META-INF/*.RSA"
+        exclude "META-INF/MANIFEST.MF"
+    }
+
     from("LICENSE") {
         rename { "${it}_${project.archives_base_name}" }
     }
