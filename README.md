@@ -36,7 +36,7 @@ distribution such as [Temurin](https://adoptium.net/) if you want to be complete
 
 ### Nalim
 Nalim is a 3rd-party library that enables near-native latency when executing native code. It is close to 50x faster than
-Project Panama. However, Nalim only works on Java 20 and below, meaning only 1.20.4 and below can use Nalium as of right
+Project Panama. However, Nalim only works on Java 20 and below, meaning only 1.20.4 and below can use Nalim as of right
 now. Nalim also requires a bit more configuration to get working:
 You can download the Nalim jar from [here](https://github.com/apangin/nalim/releases/tag/v1.1).
 
