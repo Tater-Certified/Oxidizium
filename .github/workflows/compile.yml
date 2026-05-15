@@ -128,7 +128,7 @@ jobs:
         uses: actions/setup-java@v5
         with:
           distribution: 'temurin'
-          java-version: 22
+          java-version: 25
 
       - name: Make Gradlew Executable
         run: chmod +x gradlew
