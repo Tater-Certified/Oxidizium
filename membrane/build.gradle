@@ -7,8 +7,8 @@ base {
 
 dependencies {
     implementation include(project(":oxidizium"))
-    compileOnly('com.github.RelativityMC:MembraneFFI:cdf326fe7f')
-    compileOnly('net.bytebuddy:byte-buddy-agent:1.14.0')
+    api ('com.github.RelativityMC:MembraneFFI:cdf326fe7f')
+    api ('net.bytebuddy:byte-buddy-agent:1.14.0')
 }
 
 def targetJavaVersion = 17
