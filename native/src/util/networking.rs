@@ -33,6 +33,17 @@ pub fn read_varint(buf: &mut BytesMut) -> i32 {
     result
 }
 
+/// Returns the number of bytes a VarInt will occupy
+pub fn varint_size(value: i32) -> usize {
+    match value {
+        0..=127 => 1,
+        128..=16383 => 2,
+        16384..=2097151 => 3,
+        2097152..=268435455 => 4,
+        _ => 0,
+    }
+}
+
 pub struct Property {
     pub name: Bytes,
     pub value: Bytes,
@@ -198,7 +209,8 @@ pub fn read_string(buf: &mut BytesMut) -> anyhow::Result<Bytes> {
 }
 
 pub fn read_fixed_string(buf: &mut BytesMut, expected_len: i32) -> anyhow::Result<Bytes> {
-    buf.advance(4);
+    let header_size = varint_size(expected_len);
+    buf.advance(header_size);
     Ok(buf.split_to(expected_len as usize).freeze())
 }
 
@@ -208,7 +220,8 @@ pub fn write_string(buf: &mut BytesMut, data: &[u8]) {
 }
 
 pub fn write_fixed_string(buf: &mut BytesMut, data: &[u8], expected_len: i32) {
-    let slice = data.as_ref();
-    buf.put_i32(expected_len);
-    buf.put_slice(slice);
+    let header_size = varint_size(expected_len);
+    buf.reserve(header_size + data.len());
+    write_varint(buf, expected_len);
+    buf.put_slice(data);
 }
