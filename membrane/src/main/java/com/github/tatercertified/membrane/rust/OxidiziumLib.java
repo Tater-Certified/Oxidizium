@@ -312,4 +312,16 @@ public class OxidiziumLib {
 
     @Link
     public static native float lithium_cos_double(double value);
+
+    @Link
+    public static native float wrapDegrees90(float angle);
+
+    @Link
+    public static native boolean isPowerOfTwo(long input);
+
+    @Link
+    public static native long roundToward(long input, long multiple);
+
+    @Link
+    public static native long positiveCeilDiv(long input, long divisor);
 }

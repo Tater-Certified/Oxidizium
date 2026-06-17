@@ -102,4 +102,8 @@ public interface Mth {
     float lithiumCos(double value);
     float lithiumSin(float value);
     float lithiumCos(float value);
+    float wrapDegrees90(float angle);
+    boolean isPowerOfTwo(long input);
+    long roundToward(long input, long multiple);
+    long positiveCeilDiv(long input, long divisor);
 }

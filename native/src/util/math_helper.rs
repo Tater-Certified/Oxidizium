@@ -261,6 +261,10 @@ pub extern "C" fn floor_div(dividend: i32, divisor: i32) -> i32 {
     (dividend as f32 / divisor as f32).floor() as i32
 }
 
+pub fn floor_div_i64(dividend: i64, divisor: i64) -> i64 {
+    (dividend as f64 / divisor as f64).floor() as i64
+}
+
 // TODO Implement `nextInt`, `nextFloat`, and `nextDouble`
 
 /// If the values are equal excluding floating point errors
@@ -969,4 +973,29 @@ pub extern "C" fn round_down_to_multiple(a: f64, b: i32) -> i32 {
 #[no_mangle]
 pub extern "C" fn multiply_fraction(numerator: i32, denominator: i32, multiplier: i32) -> i32 {
     numerator * multiplier / denominator
+}
+
+/// Wraps an angle within 90 degrees
+#[no_mangle]
+pub extern "C" fn wrap_degrees_90(angle: f32) -> f32 {
+    let normalized = angle.rem_euclid(90.0);
+    normalized - (90.0 * (normalized >= 45.0) as u8 as f32)
+}
+
+/// Checks if the value is a power of 2
+#[no_mangle]
+pub extern "C" fn is_power_of_2(value: i64) -> bool {
+    value > 0 && (value & (value - 1)) == 0
+}
+
+/// Rounds towards the nearest multiple
+#[no_mangle]
+pub extern "C" fn round_towards(input: i64, multiple: i64) -> i64 {
+    positive_ceil_div(input, multiple) * multiple
+}
+
+/// Ceil divide, but always positive
+#[no_mangle]
+pub extern "C" fn positive_ceil_div(input: i64, divisor: i64) -> i64 {
+    -floor_div_i64(-input, divisor)
 }

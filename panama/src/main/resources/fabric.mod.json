@@ -5,8 +5,11 @@
     "name": "${mod}",
     "description": "Implementing Minecraft In Rust",
     "authors": [
-      "QPCrummer"
+        
     ],
+    "contact": {
+        
+    },
     "license": "MIT",
     "icon": "assets/oxidizium/icon.png",
     "environment": "*",
@@ -15,7 +18,7 @@
     ],
     "depends": {
         "fabricloader": "*",
-        "minecraft": ">=26.1.0",
+        "minecraft": ">=1.14.3",
         "java": "${java_ver}"
     }
 }

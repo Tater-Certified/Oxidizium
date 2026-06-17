@@ -1,8 +1,8 @@
 {
     "schemaVersion": 1,
-    "id": "${modid}",
-    "version": "${version}",
-    "name": "${mod}",
+    "id": "oxidizium_membrane",
+    "version": "1.2.0",
+    "name": "Oxidizium Membrane",
     "description": "Implementing Minecraft In Rust",
     "authors": [
         
@@ -19,6 +19,6 @@
     "depends": {
         "fabricloader": "*",
         "minecraft": ">=1.14.3",
-        "java": "${java_ver}"
+        "java": "<21"
     }
 }

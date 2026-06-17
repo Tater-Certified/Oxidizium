@@ -498,4 +498,24 @@ public class MthImpl implements Mth {
     public float lithiumCos(float value) {
         return lib_h.lithium_cos_float(value);
     }
+
+    @Override
+    public float wrapDegrees90(float angle) {
+        return lib_h.wrap_degrees_90(angle);
+    }
+
+    @Override
+    public boolean isPowerOfTwo(long input) {
+        return lib_h.is_power_of_2(input);
+    }
+
+    @Override
+    public long roundToward(long input, long multiple) {
+        return lib_h.round_towards(input, multiple);
+    }
+
+    @Override
+    public long positiveCeilDiv(long input, long divisor) {
+        return lib_h.positive_ceil_div(input, divisor);
+    }
 }

@@ -5,7 +5,7 @@ import groovy.json.JsonSlurper
 import groovy.json.JsonOutput
 
 plugins {
-    id 'net.fabricmc.fabric-loom' version '1.15-SNAPSHOT' apply false
+    id 'net.fabricmc.fabric-loom' version '1.17-SNAPSHOT' apply false
 }
 
 subprojects {

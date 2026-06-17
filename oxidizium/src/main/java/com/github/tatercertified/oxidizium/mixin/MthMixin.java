@@ -1046,4 +1046,44 @@ public class MthMixin {
     public static int mulAndTruncate(Fraction fraction, int multiplier) {
         return MTH.multiplyFraction(fraction.getNumerator(), fraction.getDenominator(), multiplier);
     }
+
+    /**
+     * @author QPCrummer
+     * @reason Implement in Rust
+     */
+    @IfMinecraftVersion(minVersion = "26.2")
+    @Overwrite
+    public static boolean isPowerOfTwo(long input) {
+        return MTH.isPowerOfTwo(input);
+    }
+
+    /**
+     * @author QPCrummer
+     * @reason Implement in Rust
+     */
+    @IfMinecraftVersion(minVersion = "26.2")
+    @Overwrite
+    public static float wrapDegrees90(float angle) {
+        return MTH.wrapDegrees90(angle);
+    }
+
+    /**
+     * @author QPCrummer
+     * @reason Implement in Rust
+     */
+    @IfMinecraftVersion(minVersion = "26.2")
+    @Overwrite
+    public static long roundToward(long input, long multiple) {
+        return MTH.roundToward(input, multiple);
+    }
+
+    /**
+     * @author QPCrummer
+     * @reason Implement in Rust
+     */
+    @IfMinecraftVersion(minVersion = "26.2")
+    @Overwrite
+    public static long positiveCeilDiv(long input, long divisor) {
+        return MTH.positiveCeilDiv(input, divisor);
+    }
 }
