@@ -6,9 +6,7 @@ import one.nalim.Linker;
 
 @Library("oxidizium")
 public class OxidiziumLib {
-    static {
-        Linker.linkClass(OxidiziumLib.class);
-    }
+    static {Linker.linkClass(OxidiziumLib.class);}
 
     @Link
     public static native float sin_float(float value);

@@ -6,10 +6,7 @@ import com.ishland.membraneffi.api.annotations.Link;
 import net.bytebuddy.agent.ByteBuddyAgent;
 
 public class OxidiziumLib {
-    static {
-        MembraneFFI.initialize(ByteBuddyAgent.install());
-        MembraneLinker.linkClass(OxidiziumLib.class);
-    }
+    static {MembraneFFI.initialize(ByteBuddyAgent.install());MembraneLinker.linkClass(OxidiziumLib.class);}
 
     @Link
     public static native float sin_float(float value);
