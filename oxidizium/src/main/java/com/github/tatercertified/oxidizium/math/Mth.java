@@ -43,7 +43,6 @@ public interface Mth {
     float clampAngle(float value, float mean, float delta);
     float stepTowards(float from, float to, float step);
     float stepUnwrappedAngleTowards(float from, float to, float step);
-    int parseInt(String string, int fallback);
     int smallestEncompassingPowerOfTwo(int value);
     int smallestEncompassingSquareSideLength(@PositiveOnly int value);
     boolean isPowerOfTwo(int value);
@@ -57,8 +56,8 @@ public interface Mth {
     double getLerpProgress(double value, double start, double end);
     float getLerpProgress(float value, float start, float end);
     double atan2(double y, double x);
-    float inverseSqrt(@Bounded(minInclusive = 1, maxExclusive = 100) float x);
-    double inverseSqrt(@Bounded(minInclusive = 1, maxExclusive = 100) double x);
+    float inverseSqrt(float x);
+    double inverseSqrt(double x);
     double fastInverseSqrt(double x);
     float fastInverseSqrt(float x);
     float fastInverseCbrt(float x);

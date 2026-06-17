@@ -435,21 +435,6 @@ public class MthMixin {
         return MTH.stepUnwrappedAngleTowards(from, to, step);
     }
 
-    // TODO Determine if this is faster than Java implementation
-    /**
-     * @author QPCrummer
-     * @reason Implement in Rust
-     */
-    // @Config(name = "parse int", enabled = false)
-    /*
-    @Overwrite
-    public static int parseInt(String string, int fallback) {
-        char[] chars = string.toCharArray();
-        return lib_h.parse_int_utf16(MemorySegment.ofArray(chars), chars.length, fallback);
-    }
-
-     */
-
     /**
      * @author QPCrummer
      * @reason Implement in Rust
@@ -519,7 +504,7 @@ public class MthMixin {
      */
     @IfMinecraftVersion(minVersion = "1.19.4", maxVersion = "1.21.1")
     @Overwrite
-    public static int method_15353(@Bounded(minInclusive = 0.0, maxExclusive = 1.0) float r,@Bounded(minInclusive = 0.0, maxExclusive = 1.0) float g,@Bounded(minInclusive = 0.0, maxExclusive = 1.0) float b) {
+    public static int method_15353(float r, float g, float b) {
         return MTH.packRgb(r, g, b);
     }
 
@@ -598,7 +583,7 @@ public class MthMixin {
     // @Config(name = "float inverse sqrt")
     @IfMinecraftVersion(minVersion = "1.19.4")
     @Overwrite
-    public static float invSqrt(@Bounded(minInclusive = 1, maxExclusive = 100) float x) {
+    public static float invSqrt(float x) {
         return MTH.inverseSqrt(x);
     }
 
@@ -609,7 +594,7 @@ public class MthMixin {
     // @Config(name = "double inverse sqrt")
     @IfMinecraftVersion(minVersion = "1.19.4")
     @Overwrite
-    public static double invSqrt(@Bounded(minInclusive = 1, maxExclusive = 100) double x) {
+    public static double invSqrt(double x) {
         return MTH.inverseSqrt(x);
     }
 
@@ -619,7 +604,7 @@ public class MthMixin {
      */
     @Deprecated
     @Overwrite
-    public static double fastInvSqrt(@Bounded(minInclusive = 1, maxExclusive = 100) double x) {
+    public static double fastInvSqrt(double x) {
         return MTH.fastInverseSqrt(x);
     }
 
@@ -629,7 +614,7 @@ public class MthMixin {
      */
     @IfMinecraftVersion(minVersion = "1.15", maxVersion = "1.19.3")
     @Overwrite
-    public static float method_22858(@Bounded(minInclusive = 1, maxExclusive = 100) float x) {
+    public static float method_22858(float x) {
         return MTH.fastInverseSqrt(x);
     }
 

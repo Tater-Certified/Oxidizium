@@ -381,6 +381,173 @@ tasks.register("copyOxidiziumResources") {
     }
 }
 
+// - - - - Code Generation - - - - \\
+tasks.register("generateNativeHooks") {
+    def nativesDir = new File("native/src")
+
+    def interfaceClass = new File("oxidizium/src/main/java/com/github/tatercertified/oxidizium/NativeInterface.java")
+    interfaceClass.delete()
+    if (!interfaceClass.exists()) {
+        interfaceClass.createNewFile()
+    }
+    def interfaceClassWriter = interfaceClass.newWriter(true)
+    interfaceClassWriter.writeLine("package com.github.tatercertified.oxidizium;\nimport com.github.tatercertified.oxidizium.utils.annotation.*;\n")
+
+    def nalimInterfaceClass = new File("nalim/src/main/java/com/github/tatercertified/nalim/NativeInterface.java")
+    interfaceClass.delete()
+    if (!nalimInterfaceClass.exists()) {
+        nalimInterfaceClass.createNewFile()
+    }
+    def nalimInterfaceClassWriter = nalimInterfaceClass.newWriter(true)
+    nalimInterfaceClassWriter.writeLine("package com.github.tatercertified.nalim;\nimport com.github.tatercertified.oxidizium.utils.annotation.*;\n")
+
+    def membraneInterfaceClass = new File("membrane/src/main/java/com/github/tatercertified/membrane/NativeInterface.java")
+    membraneInterfaceClass.delete()
+    if (!membraneInterfaceClass.exists()) {
+        membraneInterfaceClass.createNewFile()
+    }
+    def membraneInterfaceClassWriter = membraneInterfaceClass.newWriter(true)
+    membraneInterfaceClassWriter.writeLine("package com.github.tatercertified.membrane;\nimport com.github.tatercertified.oxidizium.utils.annotation.*;\n")
+
+    def nalimImplClass = new File("nalim/src/main/java/com/github/tatercertified/nalim/NativeImpl.java")
+    nalimImplClass.delete()
+    if (!nalimImplClass.exists()) {
+        nalimImplClass.createNewFile()
+    }
+    def nalimImplClassWriter = nalimInterfaceClass.newWriter(true)
+    nalimImplClassWriter.writeLine("package com.github.tatercertified.nalim;\n")
+
+    def membraneImplClass = new File("membrane/src/main/java/com/github/tatercertified/membrane/NativeImpl.java")
+    membraneImplClass.delete()
+    if (!membraneImplClass.exists()) {
+        membraneImplClass.createNewFile()
+    }
+    def membraneImplClassWriter = membraneInterfaceClass.newWriter(true)
+    membraneImplClassWriter.writeLine("package com.github.tatercertified.membrane;\n")
+
+    def panamaImplClass = new File("panama/src/main/java/com/github/tatercertified/panama/NativeImpl.java")
+    panamaImplClass.delete()
+    if (!panamaImplClass.exists()) {
+        panamaImplClass.createNewFile()
+    }
+    def panamaImplClassWriter = panamaImplClass.newWriter(true)
+    panamaImplClassWriter.writeLine("package com.github.tatercertified.panama;\n")
+
+    nativesDir.eachFileRecurse { file ->
+        if (!file.isDirectory()) {
+            boolean nextLineImportant
+            boolean modifiersPresent
+            file.eachLine {line ->
+                if (line.startsWith("#[validate_params]")) {
+                    modifiersPresent = true
+
+                } else if (nextLineImportant) {
+                    def pattern = /fn\s+(?<name>\w+)\s*\((?<params>[^)]*)\)\s*(->\s*(?<return>[^{]+))?/
+                    def matcher = line =~ pattern
+
+                    if (matcher.find()) {
+                        // Get the function name
+                        def functionName = matcher.group("name")
+                        // Get parameters
+                        def rawParams = matcher.group("params")
+                        // Handle no return type
+                        def returnType = matcher.group("return")?.trim() ?: "void"
+                        String javaReturnType = switch (returnType) {
+                            case "f32" -> "float"
+                            case "f64" -> "double"
+                            case "u8", "i8" -> "byte"
+                            case "u16", "i16" -> "short"
+                            case "u32", "i32" -> "int"
+                            case "u64", "i64" -> "long"
+                            case "bool" -> "boolean"
+                            default -> throw new IllegalStateException("Unknown type: " + returnType)
+                        }
+
+                        List<String> parameterNames = new ArrayList<>()
+
+                        def params = rawParams.split(",")
+                                .findAll { !it.trim().isEmpty() }
+                                .collect { param ->
+                                    def parts = param.split(":")
+                                    String rawParamName = parts[0].trim()
+                                    String rustType = parts[1].trim()
+
+                                    String modifierValue = null
+
+                                    if (modifiersPresent) {
+                                        def attributeMatcher = rawParamName =~ /#\[[^]]+]/
+                                        if (attributeMatcher.find()) {
+                                            modifierValue = attributeMatcher.group(0)
+                                            rawParamName = attributeMatcher.replaceAll("").trim()
+                                        }
+                                    }
+
+                                    java.util.Optional<String> parameterModifier = java.util.Optional.ofNullable(modifierValue)
+
+                                    String paramName = rawParamName
+                                    parameterNames.add(paramName)
+
+                                    // 5. Convert the Rust type to Java type
+                                    String javaType = switch (rustType) {
+                                        case "f32" -> "float"
+                                        case "f64" -> "double"
+                                        case "u8", "i8" -> "byte"
+                                        case "u16", "i16" -> "short"
+                                        case "u32", "i32" -> "int"
+                                        case "u64", "i64" -> "long"
+                                        case "bool" -> "boolean"
+                                        default -> throw new IllegalStateException("Unknown type: " + rustType)
+                                    }
+
+                                    if (parameterModifier.isPresent()) {
+                                        String modifier = switch (parameterModifier.get()) {
+                                            case "#[max]" -> "@Max"
+                                            case "#[min]" -> "@Min"
+                                            case "#[nonzero]" -> "@NonZero"
+                                            case "#[positive_only]" -> "@PositiveOnly"
+                                            case String -> throw new IllegalStateException("Unknown modifier: " + parameterModifier.get())
+                                        }
+                                        return "${modifier} ${javaType} ${paramName}"
+                                    } else {
+                                        return "${javaType} ${paramName}"
+                                    }
+                                }
+
+                        // Main Interface
+                        String javaMethod = "${javaReturnType} ${functionName}(${params.join(', ')});"
+                        interfaceClassWriter.writeLine(javaMethod)
+
+                        // Nalim / Membrane
+                        String nalimMembraneNativeMethod = "\n@Link\npublic static native ${javaReturnType} ${functionName}(${params.join(', ')});"
+                        nalimImplClassWriter.writeLine(nalimMembraneNativeMethod)
+                        membraneImplClassWriter.writeLine(nalimMembraneNativeMethod)
+
+                        String nalimMembraneJavaOverride = "\n@Override\npublic ${javaReturnType} ${functionName}(${params.join(', ')}) {\n\treturn OxidiziumLib.${functionName}(${parameterNames.join(', ')});\n}"
+                        nalimInterfaceClassWriter.writeLine(nalimMembraneJavaOverride)
+                        membraneInterfaceClassWriter.writeLine(nalimMembraneJavaOverride)
+
+                        // Panama
+                        String panamaJavaOverride = "\n@Override\npublic ${javaReturnType} ${functionName}(${params.join(', ')}) {\n\treturn lib_h.${functionName}(${parameterNames.join(', ')});\n}"
+                        panamaImplClassWriter.writeLine(panamaJavaOverride)
+                    }
+
+                    nextLineImportant = false
+                    modifiersPresent = false
+                } else if (line.startsWith("#[no_mangle]")) {
+                    nextLineImportant = true
+                }
+            }
+        }
+    }
+
+    interfaceClassWriter.close()
+    nalimImplClassWriter.close()
+    membraneImplClassWriter.close()
+    nalimInterfaceClassWriter.close()
+    membraneInterfaceClassWriter.close()
+    panamaImplClassWriter.close()
+}
+
 
 // - - - - Task Configuration - - - - \\
 

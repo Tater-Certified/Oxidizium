@@ -205,11 +205,6 @@ public class MthImpl implements Mth {
     }
 
     @Override
-    public int parseInt(String string, int fallback) {
-        return 0; // TODO Implement
-    }
-
-    @Override
     public int smallestEncompassingPowerOfTwo(int value) {
         return OxidiziumLib.smallest_encompassing_power_of_two(value);
     }

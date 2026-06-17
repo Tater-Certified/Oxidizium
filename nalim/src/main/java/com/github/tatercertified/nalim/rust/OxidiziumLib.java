@@ -130,14 +130,6 @@ public class OxidiziumLib {
     @Link
     public static native float step_unwrapped_angle_towards(float from, float to, float step);
 
-    /*
-    @Link
-    public static native int parseInt(String string, int fallback) {
-        return 0; // TODO Implement
-    }
-
-     */
-
     @Link
     public static native int smallest_encompassing_power_of_two(int value);
 
