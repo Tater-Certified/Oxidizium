@@ -1,6 +1,8 @@
 package com.github.tatercertified.oxidizium.mixin;
 
 import com.github.tatercertified.oxidizium.utils.annotation.*;
+import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.moulberry.mixinconstraints.annotations.IfBoolean;
 import com.moulberry.mixinconstraints.annotations.IfMinecraftVersion;
 import net.minecraft.util.Mth;
@@ -179,25 +181,28 @@ public class MthMixin {
         return MTH.clamp(value, min, max);
     }
 
-    /**
-     * @author QPCrummer
-     * @reason Implement in Rust
-     */
-    // @Config(name = "double clamped lerp")
-    @Overwrite
-    public static double clampedLerp(double delta, double start, double end) {
-        return MTH.clampedLerp(delta, start, end);
+    @IfMinecraftVersion(maxVersion = "1.21.10")
+    @WrapMethod(method = "clampedLerp(DDD)D")
+    private static double oxidizium$clampedLerpD1(double factor, double min, double max, Operation<Double> original) {
+        return MTH.clampedLerp(factor, min, max);
     }
 
-    /**
-     * @author QPCrummer
-     * @reason Implement in Rust
-     */
-    // @Config(name = "float clamped lerp")
-    @IfMinecraftVersion(minVersion = "1.17.1")
-    @Overwrite
-    public static float clampedLerp(float delta, float start, float end) {
-        return MTH.clampedLerp(delta, start, end);
+    @IfMinecraftVersion(minVersion = "1.21.11")
+    @WrapMethod(method = "clampedLerp(DDD)D")
+    private static double oxidizium$clampedLerpD2(double factor, double min, double max, Operation<Double> original) {
+        return MTH.clampedLerp(min, max, factor);
+    }
+
+    @IfMinecraftVersion(minVersion = "1.17.1", maxVersion = "1.21.10")
+    @WrapMethod(method = "clampedLerp(FFF)F")
+    private static float oxidizium$clampedLerpF1(float factor, float min, float max, Operation<Float> original) {
+        return MTH.clampedLerp(factor, min, max);
+    }
+
+    @IfMinecraftVersion(minVersion = "1.21.11")
+    @WrapMethod(method = "clampedLerp(FFF)F")
+    private static float oxidizium$clampedLerpF2(float factor, float min, float max, Operation<Float> original) {
+        return MTH.clampedLerp(min, max, factor);
     }
 
     /**
