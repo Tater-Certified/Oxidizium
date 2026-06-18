@@ -3,6 +3,7 @@ use std::ffi::c_ushort;
 use std::num::Wrapping;
 use std::slice;
 use mimalloc::MiMalloc;
+use oxidizium_macros::validate_params;
 
 #[global_allocator]
 static GLOBAL: MiMalloc = MiMalloc;
@@ -123,7 +124,8 @@ pub extern "C" fn lithium_cos_double(x: f64) -> f32 {
 
 /// Square roots the input x
 #[no_mangle]
-pub extern "C" fn sqrt_float(x: f32) -> f32 {
+#[validate_params]
+pub extern "C" fn sqrt_float(#[positive_only] x: f32) -> f32 {
     x.sqrt()
 }
 
@@ -177,19 +179,22 @@ pub extern "C" fn ceil_long(x: f64) -> i64 {
 
 /// Limits the input x between a minimum and maximum value
 #[no_mangle]
-pub extern "C" fn clamp_int(x: i32, min: i32, max: i32) -> i32 {
+#[validate_params]
+pub extern "C" fn clamp_int(x: i32, #[min] min: i32, #[max] max: i32) -> i32 {
     x.max(min).min(max)
 }
 
 /// Limits the input x between a minimum and maximum value
 #[no_mangle]
-pub extern "C" fn clamp_long(x: i64, min: i64, max: i64) -> i64 {
+#[validate_params]
+pub extern "C" fn clamp_long(x: i64, #[min] min: i64, #[max] max: i64) -> i64 {
     x.max(min).min(max)
 }
 
 /// Limits the input x between a minimum and maximum value
 #[no_mangle]
-pub extern "C" fn clamp_float(x: f32, min: f32, max: f32) -> f32 {
+#[validate_params]
+pub extern "C" fn clamp_float(x: f32, #[min] min: f32, #[max] max: f32) -> f32 {
     if x < min {
         min
     } else {
@@ -199,7 +204,8 @@ pub extern "C" fn clamp_float(x: f32, min: f32, max: f32) -> f32 {
 
 /// Limits the input x between a minimum and maximum value
 #[no_mangle]
-pub extern "C" fn clamp_double(x: f64, min: f64, max: f64) -> f64 {
+#[validate_params]
+pub extern "C" fn clamp_double(x: f64, #[min] min: f64, #[max] max: f64) -> f64 {
     if x < min {
         min
     } else {
@@ -257,12 +263,17 @@ pub extern "C" fn abs_max_difference(i: i32, j: i32, k: i32, l: i32) -> i32 {
 
 /// Divides then floors
 #[no_mangle]
-pub extern "C" fn floor_div(dividend: i32, divisor: i32) -> i32 {
+#[validate_params]
+pub extern "C" fn floor_div(dividend: i32, #[nonzero] divisor: i32) -> i32 {
     (dividend as f32 / divisor as f32).floor() as i32
 }
 
 pub fn floor_div_i64(dividend: i64, divisor: i64) -> i64 {
     (dividend as f64 / divisor as f64).floor() as i64
+}
+
+pub fn floor_div_i32(dividend: i32, divisor: i32) -> i32 {
+    (dividend as f32 / divisor as f32).floor() as i32
 }
 
 // TODO Implement `nextInt`, `nextFloat`, and `nextDouble`
@@ -281,7 +292,8 @@ pub extern "C" fn approximately_equals_double(a: f64, b: f64) -> bool {
 
 /// Floor mod of the dividend and divisor
 #[no_mangle]
-pub extern "C" fn floor_mod_int(dividend: i32, divisor: i32) -> i32 {
+#[validate_params]
+pub extern "C" fn floor_mod_int(dividend: i32, #[nonzero] divisor: i32) -> i32 {
     let r: i32 = dividend % divisor;
     if (dividend ^ divisor) < 0 && r != 0 {
         r + divisor
@@ -292,19 +304,22 @@ pub extern "C" fn floor_mod_int(dividend: i32, divisor: i32) -> i32 {
 
 /// Floor mod of the dividend and divisor
 #[no_mangle]
-pub extern "C" fn floor_mod_float(dividend: f32, divisor: f32) -> f32 {
+#[validate_params]
+pub extern "C" fn floor_mod_float(dividend: f32, #[nonzero] divisor: f32) -> f32 {
     (dividend % divisor + divisor) % divisor
 }
 
 /// Floor mod of the dividend and divisor
 #[no_mangle]
-pub extern "C" fn floor_mod_double(dividend: f64, divisor: f64) -> f64 {
+#[validate_params]
+pub extern "C" fn floor_mod_double(dividend: f64, #[nonzero] divisor: f64) -> f64 {
     (dividend % divisor + divisor) % divisor
 }
 
 /// If a is a multiple of b
 #[no_mangle]
-pub extern "C" fn is_multiple_of(a: i32, b: i32) -> bool {
+#[validate_params]
+pub extern "C" fn is_multiple_of(a: i32, #[nonzero] b: i32) -> bool {
     a % b == 0
 }
 
@@ -404,7 +419,7 @@ pub extern "C" fn step_unwrapped_angle_towards(from: f32, to: f32, step: f32) ->
 /// // You can pass this pointer + length into Rust
 /// int result = lib_h.parse_int_utf16(chars_ptr, chars.length, 0);
 ///```
-#[no_mangle]
+// #[no_mangle]
 pub extern "C" fn parse_int_utf16(ptr: *const c_ushort, len: usize, fallback: i32) -> i32 {
     if ptr.is_null() || len == 0 {
         return fallback;
@@ -466,7 +481,8 @@ pub extern "C" fn smallest_encompassing_power_of_two(value: i32) -> i32 {
 
 /// Gets the smallest square side length
 #[no_mangle]
-pub extern "C" fn smallest_encompassing_square_side_length(value: i32) -> i32 {
+#[validate_params]
+pub extern "C" fn smallest_encompassing_square_side_length(#[positive_only] value: i32) -> i32 {
     ceil_double((value as f64).sqrt())
 }
 
@@ -589,13 +605,15 @@ pub extern "C" fn atan_2(mut y: f64, mut x: f64) -> f64 {
 
 /// Gets the inverse of the square root of x
 #[no_mangle]
-pub extern "C" fn inverse_sqrt_float(x: f32) -> f32 {
+#[validate_params]
+pub extern "C" fn inverse_sqrt_float(#[positive_only] x: f32) -> f32 {
     1.0 / x.sqrt()
 }
 
 /// Gets the inverse of the square root of x
 #[no_mangle]
-pub extern "C" fn inverse_sqrt_double(x: f64) -> f64 {
+#[validate_params]
+pub extern "C" fn inverse_sqrt_double(#[positive_only] x: f64) -> f64 {
     1.0 / x.sqrt()
 }
 
@@ -633,13 +651,15 @@ pub extern "C" fn fast_inverse_cbrt(x: f32) -> f32 {
 
 /// Converts HSV to RGB Values
 #[no_mangle]
-pub extern "C" fn hsv_to_rgb(hue: f32, saturation: f32, value: f32) -> i32 {
+#[validate_params]
+pub extern "C" fn hsv_to_rgb(#[positive_only] hue: f32, #[positive_only] saturation: f32, #[positive_only] value: f32) -> i32 {
     hsv_to_argb(hue, saturation, value, 0)
 }
 
 /// Converts HSV to ARGB values
 #[no_mangle]
-pub extern "C" fn hsv_to_argb(hue: f32, saturation: f32, value: f32, alpha: i32) -> i32 {
+#[validate_params]
+pub extern "C" fn hsv_to_argb(#[positive_only] hue: f32, #[positive_only] saturation: f32, #[positive_only] value: f32, #[positive_only] alpha: i32) -> i32 {
     let i = (hue * 6.0).floor() as i32 % 6;
     let f = hue * 6.0 - i as f32;
     let g = value * (1.0 - saturation);
@@ -709,14 +729,7 @@ pub extern "C" fn lerp_positive(delta: f32, start: i32, end: i32) -> i32 {
 
 /// Two-dimensional Linear Interpolation
 #[no_mangle]
-pub extern "C" fn lerp_2(
-    deltax: f64,
-    deltay: f64,
-    x0y0: f64,
-    x1y0: f64,
-    x0y1: f64,
-    x1y1: f64,
-) -> f64 {
+pub extern "C" fn lerp_2(deltax: f64, deltay: f64, x0y0: f64, x1y0: f64, x0y1: f64, x1y1: f64) -> f64 {
     lerp_double(
         deltay,
         lerp_double(deltax, x0y0, x1y0),
@@ -726,19 +739,7 @@ pub extern "C" fn lerp_2(
 
 /// Three-dimensional Linear Interpolation
 #[no_mangle]
-pub extern "C" fn lerp_3(
-    delta_x: f64,
-    delta_y: f64,
-    delta_z: f64,
-    x0y0z0: f64,
-    x1y0z0: f64,
-    x0y1z0: f64,
-    x1y1z0: f64,
-    x0y0z1: f64,
-    x1y0z1: f64,
-    x0y1z1: f64,
-    x1y1z1: f64,
-) -> f64 {
+pub extern "C" fn lerp_3(delta_x: f64, delta_y: f64, delta_z: f64, x0y0z0: f64, x1y0z0: f64, x0y1z0: f64, x1y1z0: f64, x0y0z1: f64, x1y0z1: f64, x0y1z1: f64, x1y1z1: f64) -> f64 {
     lerp_double(
         delta_z,
         lerp_2(delta_x, delta_y, x0y0z0, x1y0z0, x0y1z0, x1y1z0),
@@ -838,13 +839,7 @@ pub extern "C" fn square_long(value: i64) -> i64 {
 
 /// Linearly maps a value from one number range to another and clamps the result
 #[no_mangle]
-pub extern "C" fn clamped_map_double(
-    value: f64,
-    old_start: f64,
-    old_end: f64,
-    new_start: f64,
-    new_end: f64,
-) -> f64 {
+pub extern "C" fn clamped_map_double(value: f64, old_start: f64, old_end: f64, new_start: f64, new_end: f64) -> f64 {
     clamp_lerp_double(
         new_start,
         new_end,
@@ -854,13 +849,7 @@ pub extern "C" fn clamped_map_double(
 
 /// Linearly maps a value from one number range to another and clamps the result
 #[no_mangle]
-pub extern "C" fn clamped_map_float(
-    value: f32,
-    old_start: f32,
-    old_end: f32,
-    new_start: f32,
-    new_end: f32,
-) -> f32 {
+pub extern "C" fn clamped_map_float(value: f32, old_start: f32, old_end: f32, new_start: f32, new_end: f32) -> f32 {
     clamp_lerp_float(
         new_start,
         new_end,
@@ -870,13 +859,7 @@ pub extern "C" fn clamped_map_float(
 
 /// Linearly maps a value from one number range to another, unclamped
 #[no_mangle]
-pub extern "C" fn map_double(
-    value: f64,
-    old_start: f64,
-    old_end: f64,
-    new_start: f64,
-    new_end: f64,
-) -> f64 {
+pub extern "C" fn map_double(value: f64, old_start: f64, old_end: f64, new_start: f64, new_end: f64) -> f64 {
     lerp_double(
         get_lerp_progress_double(value, old_start, old_end),
         new_start,
@@ -886,13 +869,7 @@ pub extern "C" fn map_double(
 
 /// Linearly maps a value from one number range to another, unclamped
 #[no_mangle]
-pub extern "C" fn map_float(
-    value: f32,
-    old_start: f32,
-    old_end: f32,
-    new_start: f32,
-    new_end: f32,
-) -> f32 {
+pub extern "C" fn map_float(value: f32, old_start: f32, old_end: f32, new_start: f32, new_end: f32) -> f32 {
     lerp_float(
         get_lerp_progress_float(value, old_start, old_end),
         new_start,
@@ -904,13 +881,15 @@ pub extern "C" fn map_float(
 
 /// Returns a value farther than or as far as value from zero that is a multiple of divisor
 #[no_mangle]
-pub extern "C" fn round_up_to_multiple(value: i32, divisor: i32) -> i32 {
+#[validate_params]
+pub extern "C" fn round_up_to_multiple(value: i32, #[nonzero] divisor: i32) -> i32 {
     ceil_div(value, divisor) * divisor
 }
 
 /// Divides then ceilings
 #[no_mangle]
-pub extern "C" fn ceil_div(a: i32, b: i32) -> i32 {
+#[validate_params]
+pub extern "C" fn ceil_div(a: i32, #[nonzero] b: i32) -> i32 {
     -floor_div(-a, b)
 }
 
@@ -990,12 +969,24 @@ pub extern "C" fn is_power_of_2(value: i64) -> bool {
 
 /// Rounds towards the nearest multiple
 #[no_mangle]
-pub extern "C" fn round_towards(input: i64, multiple: i64) -> i64 {
-    positive_ceil_div(input, multiple) * multiple
+pub extern "C" fn round_towards_long(input: i64, multiple: i64) -> i64 {
+    positive_ceil_div_long(input, multiple) * multiple
+}
+
+/// Rounds towards the nearest multiple
+#[no_mangle]
+pub extern "C" fn round_towards_int(input: i32, multiple: i32) -> i32 {
+    positive_ceil_div_int(input, multiple) * multiple
 }
 
 /// Ceil divide, but always positive
 #[no_mangle]
-pub extern "C" fn positive_ceil_div(input: i64, divisor: i64) -> i64 {
+pub extern "C" fn positive_ceil_div_long(input: i64, divisor: i64) -> i64 {
     -floor_div_i64(-input, divisor)
+}
+
+/// Ceil divide, but always positive
+#[no_mangle]
+pub extern "C" fn positive_ceil_div_int(input: i32, divisor: i32) -> i32 {
+    -floor_div_i32(-input, divisor)
 }

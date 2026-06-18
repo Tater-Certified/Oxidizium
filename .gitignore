@@ -34,3 +34,11 @@
 /nalim/build
 /panama/build/classes/java/main/com/github/tatercertified/rust
 /panama/build
+/native/macros/target
+/membrane/build
+membrane/src/main/java/com/github/tatercertified/membrane/NativeImpl.java
+membrane/src/main/java/com/github/tatercertified/membrane/OxidiziumLib.java
+nalim/src/main/java/com/github/tatercertified/nalim/NativeImpl.java
+nalim/src/main/java/com/github/tatercertified/nalim/OxidiziumLib.java
+oxidizium/src/main/java/com/github/tatercertified/oxidizium/NativeInterface.java
+panama/src/main/java/com/github/tatercertified/panama/NativeImpl.java

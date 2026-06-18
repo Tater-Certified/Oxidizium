@@ -23,7 +23,7 @@ public class LithiumMthMixin {
     @IfMinecraftVersion(minVersion = "1.21.11")
     @Overwrite
     public static float sin(double value) {
-        return MTH.lithiumSin(value);
+        return MTH.lithium_sin_double(value);
     }
 
     /**
@@ -34,7 +34,7 @@ public class LithiumMthMixin {
     @IfMinecraftVersion(minVersion = "1.21.11")
     @Overwrite
     public static float cos(double value) {
-        return MTH.lithiumCos(value);
+        return MTH.lithium_cos_double(value);
     }
 
     /**
@@ -45,7 +45,7 @@ public class LithiumMthMixin {
     @IfMinecraftVersion(maxVersion = "1.21.10")
     @Overwrite
     public static float sin(float value) {
-        return MTH.lithiumSin(value);
+        return MTH.lithium_sin_float(value);
     }
 
     /**
@@ -56,6 +56,6 @@ public class LithiumMthMixin {
     @IfMinecraftVersion(maxVersion = "1.21.10")
     @Overwrite
     public static float cos(float value) {
-        return MTH.lithiumCos(value);
+        return MTH.lithium_cos_float(value);
     }
 }
