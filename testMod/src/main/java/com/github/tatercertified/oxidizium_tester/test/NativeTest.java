@@ -197,11 +197,6 @@ public class NativeTest {
                 args[i] = Math.abs(((Number) args[i]).intValue());
             }
 
-            if (parameters[i].isAnnotationPresent(Bounded.class)) {
-                Bounded bounded = parameters[i].getAnnotation(Bounded.class);
-                args[i] = getCorrectValueBounded(parameters[i].getType(), bounded.minInclusive(), bounded.maxExclusive());
-            }
-
             if (parameters[i].isAnnotationPresent(Min.class)) {
                 minIndex = i;
             } else if (parameters[i].isAnnotationPresent(Max.class)) {
