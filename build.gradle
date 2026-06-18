@@ -383,6 +383,7 @@ tasks.register("copyOxidiziumResources") {
 
 // - - - - Code Generation - - - - \\
 tasks.register("generateNativeHooks") {
+    println "Generating Native Hooks"
     def nativesDir = new File("native/src")
 
     def interfaceClass = new File("oxidizium/src/main/java/com/github/tatercertified/oxidizium/NativeInterface.java")
@@ -566,31 +567,26 @@ project(':testMod').tasks.named('build').configure {
     dependsOn tasks.named('hashLib')
 }
 
-project(':oxidizium').tasks.named('compileJava').configure {
-    mustRunAfter tasks.named('runJextract')
-}
+project(":oxidizium") {
+    tasks.named("compileJava").configure {
+        dependsOn rootProject.tasks.named("runJextract")
+        dependsOn rootProject.tasks.named('generateNativeHooks')
+    }
 
-project(':oxidizium').tasks.named('processResources').configure {
-    dependsOn rootProject.tasks.named('hashLib')
-}
-
-project(':nalim').tasks.named('jar').configure {
-    mustRunAfter rootProject.tasks.named('hashLib')
-}
-
-project(':membrane').tasks.named('jar').configure {
-    mustRunAfter rootProject.tasks.named('hashLib')
+    tasks.named('processResources').configure {
+        dependsOn rootProject.tasks.named('hashLib')
+    }
 }
 
 project(":panama") {
-    tasks.withType(Jar).configureEach {
-        if (name == "sourcesJar") {
+    tasks.withType(Jar).configureEach {       if (name == "sourcesJar") {
             dependsOn rootProject.tasks.named("runJextract")
         }
     }
 
     tasks.named("compileJava").configure {
         dependsOn rootProject.tasks.named("runJextract")
+        dependsOn rootProject.tasks.named('generateNativeHooks')
     }
 
     tasks.named('jar').configure {
@@ -607,6 +603,7 @@ project(":nalim") {
 
     tasks.named("compileJava").configure {
         dependsOn rootProject.tasks.named("runJextract")
+        dependsOn rootProject.tasks.named('generateNativeHooks')
     }
 
     tasks.named('jar').configure {
@@ -623,6 +620,7 @@ project(":membrane") {
 
     tasks.named("compileJava").configure {
         dependsOn rootProject.tasks.named("runJextract")
+        dependsOn rootProject.tasks.named('generateNativeHooks')
     }
 
     tasks.named('jar').configure {
