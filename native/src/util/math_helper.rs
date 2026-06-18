@@ -272,6 +272,10 @@ pub fn floor_div_i64(dividend: i64, divisor: i64) -> i64 {
     (dividend as f64 / divisor as f64).floor() as i64
 }
 
+pub fn floor_div_i32(dividend: i32, divisor: i32) -> i32 {
+    (dividend as f32 / divisor as f32).floor() as i32
+}
+
 // TODO Implement `nextInt`, `nextFloat`, and `nextDouble`
 
 /// If the values are equal excluding floating point errors
@@ -725,14 +729,7 @@ pub extern "C" fn lerp_positive(delta: f32, start: i32, end: i32) -> i32 {
 
 /// Two-dimensional Linear Interpolation
 #[no_mangle]
-pub extern "C" fn lerp_2(
-    deltax: f64,
-    deltay: f64,
-    x0y0: f64,
-    x1y0: f64,
-    x0y1: f64,
-    x1y1: f64,
-) -> f64 {
+pub extern "C" fn lerp_2(deltax: f64, deltay: f64, x0y0: f64, x1y0: f64, x0y1: f64, x1y1: f64) -> f64 {
     lerp_double(
         deltay,
         lerp_double(deltax, x0y0, x1y0),
@@ -742,19 +739,7 @@ pub extern "C" fn lerp_2(
 
 /// Three-dimensional Linear Interpolation
 #[no_mangle]
-pub extern "C" fn lerp_3(
-    delta_x: f64,
-    delta_y: f64,
-    delta_z: f64,
-    x0y0z0: f64,
-    x1y0z0: f64,
-    x0y1z0: f64,
-    x1y1z0: f64,
-    x0y0z1: f64,
-    x1y0z1: f64,
-    x0y1z1: f64,
-    x1y1z1: f64,
-) -> f64 {
+pub extern "C" fn lerp_3(delta_x: f64, delta_y: f64, delta_z: f64, x0y0z0: f64, x1y0z0: f64, x0y1z0: f64, x1y1z0: f64, x0y0z1: f64, x1y0z1: f64, x0y1z1: f64, x1y1z1: f64) -> f64 {
     lerp_double(
         delta_z,
         lerp_2(delta_x, delta_y, x0y0z0, x1y0z0, x0y1z0, x1y1z0),
@@ -854,13 +839,7 @@ pub extern "C" fn square_long(value: i64) -> i64 {
 
 /// Linearly maps a value from one number range to another and clamps the result
 #[no_mangle]
-pub extern "C" fn clamped_map_double(
-    value: f64,
-    old_start: f64,
-    old_end: f64,
-    new_start: f64,
-    new_end: f64,
-) -> f64 {
+pub extern "C" fn clamped_map_double(value: f64, old_start: f64, old_end: f64, new_start: f64, new_end: f64) -> f64 {
     clamp_lerp_double(
         new_start,
         new_end,
@@ -870,13 +849,7 @@ pub extern "C" fn clamped_map_double(
 
 /// Linearly maps a value from one number range to another and clamps the result
 #[no_mangle]
-pub extern "C" fn clamped_map_float(
-    value: f32,
-    old_start: f32,
-    old_end: f32,
-    new_start: f32,
-    new_end: f32,
-) -> f32 {
+pub extern "C" fn clamped_map_float(value: f32, old_start: f32, old_end: f32, new_start: f32, new_end: f32) -> f32 {
     clamp_lerp_float(
         new_start,
         new_end,
@@ -886,13 +859,7 @@ pub extern "C" fn clamped_map_float(
 
 /// Linearly maps a value from one number range to another, unclamped
 #[no_mangle]
-pub extern "C" fn map_double(
-    value: f64,
-    old_start: f64,
-    old_end: f64,
-    new_start: f64,
-    new_end: f64,
-) -> f64 {
+pub extern "C" fn map_double(value: f64, old_start: f64, old_end: f64, new_start: f64, new_end: f64) -> f64 {
     lerp_double(
         get_lerp_progress_double(value, old_start, old_end),
         new_start,
@@ -902,13 +869,7 @@ pub extern "C" fn map_double(
 
 /// Linearly maps a value from one number range to another, unclamped
 #[no_mangle]
-pub extern "C" fn map_float(
-    value: f32,
-    old_start: f32,
-    old_end: f32,
-    new_start: f32,
-    new_end: f32,
-) -> f32 {
+pub extern "C" fn map_float(value: f32, old_start: f32, old_end: f32, new_start: f32, new_end: f32) -> f32 {
     lerp_float(
         get_lerp_progress_float(value, old_start, old_end),
         new_start,
@@ -1008,12 +969,24 @@ pub extern "C" fn is_power_of_2(value: i64) -> bool {
 
 /// Rounds towards the nearest multiple
 #[no_mangle]
-pub extern "C" fn round_towards(input: i64, multiple: i64) -> i64 {
-    positive_ceil_div(input, multiple) * multiple
+pub extern "C" fn round_towards_long(input: i64, multiple: i64) -> i64 {
+    positive_ceil_div_long(input, multiple) * multiple
+}
+
+/// Rounds towards the nearest multiple
+#[no_mangle]
+pub extern "C" fn round_towards_int(input: i32, multiple: i32) -> i32 {
+    positive_ceil_div_int(input, multiple) * multiple
 }
 
 /// Ceil divide, but always positive
 #[no_mangle]
-pub extern "C" fn positive_ceil_div(input: i64, divisor: i64) -> i64 {
+pub extern "C" fn positive_ceil_div_long(input: i64, divisor: i64) -> i64 {
     -floor_div_i64(-input, divisor)
+}
+
+/// Ceil divide, but always positive
+#[no_mangle]
+pub extern "C" fn positive_ceil_div_int(input: i32, divisor: i32) -> i32 {
+    -floor_div_i32(-input, divisor)
 }

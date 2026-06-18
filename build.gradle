@@ -393,37 +393,37 @@ tasks.register("generateNativeHooks") {
     def interfaceClassWriter = interfaceClass.newWriter(true)
     interfaceClassWriter.writeLine("package com.github.tatercertified.oxidizium;\nimport com.github.tatercertified.oxidizium.utils.annotation.*;\npublic interface NativeInterface {")
 
-    def nalimInterfaceClass = new File("nalim/src/main/java/com/github/tatercertified/nalim/NalimNativeInterface.java")
-    interfaceClass.delete()
+    def nalimInterfaceClass = new File("nalim/src/main/java/com/github/tatercertified/nalim/OxidiziumLib.java")
+    nalimInterfaceClass.delete()
     if (!nalimInterfaceClass.exists()) {
         nalimInterfaceClass.createNewFile()
     }
     def nalimInterfaceClassWriter = nalimInterfaceClass.newWriter(true)
-    nalimInterfaceClassWriter.writeLine("package com.github.tatercertified.nalim;\nimport com.github.tatercertified.oxidizium.utils.annotation.*;\nimport one.nalim.Library;\nimport one.nalim.Link;\nimport one.nalim.Linker;\npublic class NalimNativeInterface {\nstatic {Linker.linkClass(NalimNativeInterface.class);}\n")
+    nalimInterfaceClassWriter.writeLine("package com.github.tatercertified.nalim;\nimport com.github.tatercertified.oxidizium.utils.annotation.*;\nimport one.nalim.Library;\nimport one.nalim.Link;\nimport one.nalim.Linker;\n@Library(\"oxidizium\")\npublic class OxidiziumLib {\nstatic {Linker.linkClass(OxidiziumLib.class);}\n")
 
-    def membraneInterfaceClass = new File("membrane/src/main/java/com/github/tatercertified/membrane/MembraneNativeInterface.java")
+    def membraneInterfaceClass = new File("membrane/src/main/java/com/github/tatercertified/membrane/OxidiziumLib.java")
     membraneInterfaceClass.delete()
     if (!membraneInterfaceClass.exists()) {
         membraneInterfaceClass.createNewFile()
     }
     def membraneInterfaceClassWriter = membraneInterfaceClass.newWriter(true)
-    membraneInterfaceClassWriter.writeLine("package com.github.tatercertified.membrane;\nimport com.github.tatercertified.oxidizium.utils.annotation.*;\nimport com.ishland.membraneffi.MembraneFFI;\nimport com.ishland.membraneffi.api.MembraneLinker;\nimport com.ishland.membraneffi.api.annotations.Link;\nimport net.bytebuddy.agent.ByteBuddyAgent;\npublic class MembraneNativeInterface {\nstatic {MembraneFFI.initialize(ByteBuddyAgent.install());MembraneLinker.linkClass(OxidiziumLib.class);}\n")
+    membraneInterfaceClassWriter.writeLine("package com.github.tatercertified.membrane;\nimport com.github.tatercertified.oxidizium.utils.annotation.*;\nimport com.ishland.membraneffi.MembraneFFI;\nimport com.ishland.membraneffi.api.MembraneLinker;\nimport com.ishland.membraneffi.api.annotations.Link;\nimport net.bytebuddy.agent.ByteBuddyAgent;\npublic class OxidiziumLib {\nstatic {MembraneFFI.initialize(ByteBuddyAgent.install());MembraneLinker.linkClass(OxidiziumLib.class);}\n")
 
     def nalimImplClass = new File("nalim/src/main/java/com/github/tatercertified/nalim/NativeImpl.java")
     nalimImplClass.delete()
     if (!nalimImplClass.exists()) {
         nalimImplClass.createNewFile()
     }
-    def nalimImplClassWriter = nalimInterfaceClass.newWriter(true)
-    nalimImplClassWriter.writeLine("package com.github.tatercertified.nalim;\nimport com.github.tatercertified.oxidizium.NativeInterface;\npublic class NativeImpl implements NativeInterface {")
+    def nalimImplClassWriter = nalimImplClass.newWriter(true)
+    nalimImplClassWriter.writeLine("package com.github.tatercertified.nalim;\nimport com.github.tatercertified.oxidizium.NativeInterface;\nimport com.github.tatercertified.oxidizium.utils.annotation.*;\npublic class NativeImpl implements NativeInterface {")
 
     def membraneImplClass = new File("membrane/src/main/java/com/github/tatercertified/membrane/NativeImpl.java")
     membraneImplClass.delete()
     if (!membraneImplClass.exists()) {
         membraneImplClass.createNewFile()
     }
-    def membraneImplClassWriter = membraneInterfaceClass.newWriter(true)
-    membraneImplClassWriter.writeLine("package com.github.tatercertified.membrane;\nimport com.github.tatercertified.oxidizium.NativeInterface;\npublic class NativeImpl implements NativeInterface {")
+    def membraneImplClassWriter = membraneImplClass.newWriter(true)
+    membraneImplClassWriter.writeLine("package com.github.tatercertified.membrane;\nimport com.github.tatercertified.oxidizium.NativeInterface;\nimport com.github.tatercertified.oxidizium.utils.annotation.*;\npublic class NativeImpl implements NativeInterface {")
 
     def panamaImplClass = new File("panama/src/main/java/com/github/tatercertified/panama/NativeImpl.java")
     panamaImplClass.delete()
@@ -431,7 +431,7 @@ tasks.register("generateNativeHooks") {
         panamaImplClass.createNewFile()
     }
     def panamaImplClassWriter = panamaImplClass.newWriter(true)
-    panamaImplClassWriter.writeLine("package com.github.tatercertified.panama;\nimport com.github.tatercertified.oxidizium.NativeInterface;\nimport com.github.tatercertified.rust.lib_h;\npublic class NativeImpl implements NativeInterface {")
+    panamaImplClassWriter.writeLine("package com.github.tatercertified.panama;\nimport com.github.tatercertified.oxidizium.NativeInterface;\nimport com.github.tatercertified.oxidizium.utils.annotation.*;\nimport com.github.tatercertified.rust.lib_h;\npublic class NativeImpl implements NativeInterface {")
 
     nativesDir.eachFileRecurse { file ->
         if (!file.isDirectory()) {
@@ -484,7 +484,7 @@ tasks.register("generateNativeHooks") {
 
                                     java.util.Optional<String> parameterModifier = java.util.Optional.ofNullable(modifierValue)
 
-                                    String paramName = rawParamName
+                                    String paramName = rawParamName.replace("mut ", "")
                                     parameterNames.add(paramName)
 
                                     // 5. Convert the Rust type to Java type
@@ -519,12 +519,12 @@ tasks.register("generateNativeHooks") {
 
                         // Nalim / Membrane
                         String nalimMembraneNativeMethod = "\n@Link\npublic static native ${javaReturnType} ${functionName}(${params.join(', ')});"
-                        nalimImplClassWriter.writeLine(nalimMembraneNativeMethod)
-                        membraneImplClassWriter.writeLine(nalimMembraneNativeMethod)
+                        nalimInterfaceClassWriter.writeLine(nalimMembraneNativeMethod)
+                        membraneInterfaceClassWriter.writeLine(nalimMembraneNativeMethod)
 
                         String nalimMembraneJavaOverride = "\n@Override\npublic ${javaReturnType} ${functionName}(${params.join(', ')}) {\n\treturn OxidiziumLib.${functionName}(${parameterNames.join(', ')});\n}"
-                        nalimInterfaceClassWriter.writeLine(nalimMembraneJavaOverride)
-                        membraneInterfaceClassWriter.writeLine(nalimMembraneJavaOverride)
+                        nalimImplClassWriter.writeLine(nalimMembraneJavaOverride)
+                        membraneImplClassWriter.writeLine(nalimMembraneJavaOverride)
 
                         // Panama
                         String panamaJavaOverride = "\n@Override\npublic ${javaReturnType} ${functionName}(${params.join(', ')}) {\n\treturn lib_h.${functionName}(${parameterNames.join(', ')});\n}"
