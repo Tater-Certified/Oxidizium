@@ -5,9 +5,19 @@ base {
     archivesName = project.archives_base_name
 }
 
+repositories {
+    // Treat libs/ as a flat-dir Maven repository so Loom's include() will accept
+    // the local nalim.jar (include() refuses raw file-tree entries — needs
+    // "module components with capabilities").
+    flatDir {
+        dirs 'libs'
+    }
+}
+
 dependencies {
     implementation include(project(":oxidizium"))
-    api fileTree(dir: "libs", include: ["*.jar"])
+    // JiJ nalim.jar
+    implementation include(":nalim:@jar")
 }
 
 def targetJavaVersion = 17

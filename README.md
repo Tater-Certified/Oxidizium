@@ -19,7 +19,7 @@ As of now, Oxidizium is very compatible with the majority of mods, with specific
 
 ## Backends
 Oxidizium comes with 3 backends by default: Panama, Nalim, and Membrane. The backend will be in the jar and mod name.
-Each backend has its own pros and cons. Read about them below:
+Each backend is slightly different, so read about them below:
 
 ### Project Panama
 Project Panama is a Java 22+ feature that allows for low latency native code execution. This works on any Minecraft version
@@ -35,44 +35,22 @@ best performance, however be warned that it is possible (though very unlikely) t
 distribution such as [Temurin](https://adoptium.net/) if you want to be completely safe.
 
 ### Nalim
-Nalim is a 3rd-party library that enables near-native latency when executing native code. It is close to 50x faster than
-Project Panama. However, Nalim only works on Java 20 and below, meaning only 1.20.4 and below can use Nalim as of right
-now. Nalim also requires a bit more configuration to get working:
-You can download the Nalim jar from [here](https://github.com/apangin/nalim/releases/tag/v1.1).
+Nalim is a 3rd-party library that enables near-native latency when executing native code. It is roughly 3x faster than
+Project Panama for leaf (quick) calls and was ~50x faster vs pre-FFM Panama on JDK 19, per the [Nalim README](https://github.com/apangin/nalim#performance).
 
-**<u>It requires Java 20 or below</u>**.<p>
-The following JVM start command structure is recommended:
-```markdown
-java -Xmx2G -XX:+UnlockExperimentalVMOptions -XX:+EnableJVMCI \
---add-exports=jdk.internal.vm.ci/jdk.vm.ci.code=ALL-UNNAMED \
---add-exports=jdk.internal.vm.ci/jdk.vm.ci.code.site=ALL-UNNAMED \
---add-exports=jdk.internal.vm.ci/jdk.vm.ci.hotspot=ALL-UNNAMED \
---add-exports=jdk.internal.vm.ci/jdk.vm.ci.meta=ALL-UNNAMED \
---add-exports=jdk.internal.vm.ci/jdk.vm.ci.runtime=ALL-UNNAMED \
--javaagent:nalim.jar \
--Djava.library.path=./libraries/oxidizium \
--cp nalim.jar:fabric-server-launch.jar \
-net.fabricmc.loader.impl.launch.server.FabricServerLauncher nogui
-```
-Feel free to change the RAM amount `-Xmx2G` and add more JVM arguments.
+Nalim historically broke on Java 21+ because Loom [JEP 444](https://openjdk.org/jeps/444) made the JVMCI nmethod entry barrier mandatory for every GC.
+Oxidizium ships a [Nalim jar patched by FurryMileon](https://github.com/FurryMileon/nalim) that emits a "no-op" barrier sequence after the tail-call so JVMCI validation passes
+without any runtime overhead — the barrier bytes are dead code (placed after `jmp rax` / `br x9`).
+#### Usage
+The following JVM arguments are **required** to run Nalim: `-XX:+UnlockExperimentalVMOptions -XX:+EnableJVMCI`
 
 ### Membrane
-Membrane works similar to Nalim except the installation process is streamlined.
-Like Nalim, it requires Java 20 or below.
-You still need to use the arguments from Nalim, but there is no longer a need for a java agent:
+Membrane works similar to Nalim, though may achieve slightly lower latency than Nalim (benchmarks soon).
+Like Nalim, it used to require Java 20 and below, but thanks to an included [patched Membrane jar by QPCrummer](https://github.com/QPCrummer/MembraneFFI),
+it works great in all Minecraft versions using Java 21 and 25!
+#### Usage
+The following JVM arguments are **required** to run Nalim: `-XX:+UnlockExperimentalVMOptions -XX:+EnableJVMCI`
 
-```markdown
-java -Xmx2G -XX:+UnlockExperimentalVMOptions -XX:+EnableJVMCI \
---add-exports=jdk.internal.vm.ci/jdk.vm.ci.code=ALL-UNNAMED \
---add-exports=jdk.internal.vm.ci/jdk.vm.ci.code.site=ALL-UNNAMED \
---add-exports=jdk.internal.vm.ci/jdk.vm.ci.hotspot=ALL-UNNAMED \
---add-exports=jdk.internal.vm.ci/jdk.vm.ci.meta=ALL-UNNAMED \
---add-exports=jdk.internal.vm.ci/jdk.vm.ci.runtime=ALL-UNNAMED \
--Djava.library.path=./libraries/oxidizium \
--jar fabric-server-launch.jar \
- nogui
-```
-Feel free to change the RAM amount `-Xmx2G` and add more JVM arguments.
 ---
 
 ## Testing
@@ -104,3 +82,6 @@ x86_64 and Linux x86_64, but should work with macOS x86_64 (Intel).
 **NOTE:** These are broken as of 1.2.0!
 To run the `Oxidizium` mod, use `gradlew :oxidizium:runClient` or `gradlew :oxidizium:runServer`<p>
 To run the `Oxidizium-Test` mod, use `gradlew :testMod:runClient`. This will automatically enable the testing GUI
+
+# Licensing
+This project is licensed under MIT; however, the Nalim jar is licensed under GPLv3 to be in compliance with the original codebase.

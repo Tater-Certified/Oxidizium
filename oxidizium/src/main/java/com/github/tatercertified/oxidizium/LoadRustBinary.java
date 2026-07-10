@@ -104,9 +104,8 @@ public class LoadRustBinary {
                 Files.copy(inputStream, destinationPath, StandardCopyOption.REPLACE_EXISTING);
             }
 
-            if (Config.isMembrane()) {
-                System.loadLibrary("oxidizium");
-            }
+            System.setProperty("oxidizium.native.path",
+                    destinationPath.toAbsolutePath().toString());
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
