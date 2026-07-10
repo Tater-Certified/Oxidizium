@@ -400,7 +400,7 @@ tasks.register("generateNativeHooks") {
         nalimInterfaceClass.createNewFile()
     }
     def nalimInterfaceClassWriter = nalimInterfaceClass.newWriter(true)
-    nalimInterfaceClassWriter.writeLine("package com.github.tatercertified.nalim;\nimport com.github.tatercertified.oxidizium.utils.annotation.*;\nimport one.nalim.Library;\nimport one.nalim.Link;\nimport one.nalim.Linker;\npublic class OxidiziumLib {\nstatic {String soPath = System.getProperty(\"oxidizium.native.path\");\nif (soPath != null) {Linker.loadLibrary(soPath);}\nLinker.linkClass(OxidiziumLib.class);}\n")
+    nalimInterfaceClassWriter.writeLine("package com.github.tatercertified.nalim;\nimport com.github.tatercertified.oxidizium.utils.annotation.*;\nimport one.nalim.Link;\nimport one.nalim.Linker;\npublic class OxidiziumLib {\nstatic {String soPath = System.getProperty(\"oxidizium.native.path\");\nif (soPath != null) {Linker.loadLibrary(soPath);}\nLinker.linkClass(OxidiziumLib.class);}\n")
 
     def membraneInterfaceClass = new File("membrane/src/main/java/com/github/tatercertified/membrane/OxidiziumLib.java")
     membraneInterfaceClass.delete()
