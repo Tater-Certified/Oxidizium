@@ -518,10 +518,13 @@ tasks.register("generateNativeHooks") {
                         String javaMethod = "${javaReturnType} ${functionName}(${params.join(', ')});"
                         interfaceClassWriter.writeLine(javaMethod)
 
-                        // Nalim / Membrane
-                        String nalimMembraneNativeMethod = "\n@Link\npublic static native ${javaReturnType} ${functionName}(${params.join(', ')});"
-                        nalimInterfaceClassWriter.writeLine(nalimMembraneNativeMethod)
-                        membraneInterfaceClassWriter.writeLine(nalimMembraneNativeMethod)
+                        // Nalim
+                        String nalimNativeMethod = "\n@Link\npublic static native ${javaReturnType} ${functionName}(${params.join(', ')});"
+                        nalimInterfaceClassWriter.writeLine(nalimNativeMethod)
+
+                        // Membrane (requires explicit symbol name)
+                        String membraneNativeMethod = "\n@Link(\"${functionName}\")\npublic static native ${javaReturnType} ${functionName}(${params.join(', ')});"
+                        membraneInterfaceClassWriter.writeLine(membraneNativeMethod)
 
                         String nalimMembraneJavaOverride = "\n@Override\npublic ${javaReturnType} ${functionName}(${params.join(', ')}) {\n\treturn OxidiziumLib.${functionName}(${parameterNames.join(', ')});\n}"
                         nalimImplClassWriter.writeLine(nalimMembraneJavaOverride)

@@ -50,6 +50,7 @@ Like Nalim, it used to require Java 20 and below, but thanks to an included [pat
 it works great in all Minecraft versions using Java 21 and 25!
 #### Usage
 The following JVM arguments are **required** to run Nalim: `-XX:+UnlockExperimentalVMOptions -XX:+EnableJVMCI`
+The following JVM argument is **recommended**, but not required yet: `-XX:+EnableDynamicAgentLoading`
 
 ---
 
