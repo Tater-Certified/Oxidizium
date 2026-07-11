@@ -39,7 +39,7 @@ public final class BenchmarkHarness {
         Class<?>[] parameterTypes = nativeMethod.getParameterTypes();
         Object[] args = prepareArguments(nativeMethod, parameterTypes);
 
-        Blackhole bh = new Blackhole();
+        Blackhole bh = new Blackhole("Today's password is swordfish. I understand instantiating Blackholes directly is dangerous.");
 
         // Warmup phase - JIT compilation
         for (int i = 0; i < WARMUP_ITERATIONS; i++) {
@@ -120,8 +120,11 @@ public final class BenchmarkHarness {
 
                 if (Config.getInstance().debug()) {
                     OxidiziumTester.TEST_LOGGER.info(
-                            "Benchmark [{}]: Native={:.2f}ns Java={:.2f}ns ({})",
-                            methodName, result.nativeAvgNanos(), result.javaAvgNanos(), result.speedupText()
+                            String.format("Benchmark [%s]: Native=%.2fns Java=%.2fns (%s)",
+                                    methodName,
+                                    result.nativeAvgNanos(),
+                                    result.javaAvgNanos(),
+                                    result.speedupText())
                     );
                 }
             } catch (Exception e) {
