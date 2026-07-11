@@ -561,6 +561,16 @@ tasks.register("generateNativeHooks") {
     panamaImplClassWriter.close()
 
     // Benchmarks
+    def hardcodedValues = [
+            "byte":    "2",
+            "short":   "5",
+            "int":     "10",
+            "long":    "100L",
+            "float":   "0.25F",
+            "double":  "100.5",
+            "boolean": "true"
+    ]
+
     def benchmarkClass = new File("testMod/src/main/java/com/github/tatercertified/oxidizium_tester/test/Benchmarks.java")
     benchmarkClass.delete();
     benchmarkClass.createNewFile();
@@ -595,24 +605,31 @@ tasks.register("generateNativeHooks") {
             String methodName = matcher.group("name")
             String params = matcher.group("params")
             String nativeMethodName = matcher.group("native")
-            String args = matcher.group("args")
 
             // Create a unique key for the signature to handle duplicates
             String signatureKey = "$methodName($params)"
             if (uniqueSignatures.contains(signatureKey)) return
             uniqueSignatures.add(signatureKey)
 
-            // 3. Generate Strings
-            // TODO Benchmarks do not support parameters
+            // Parse parameters: e.g., "double value, int count" -> ["double", "int"]
+            def paramTypes = matcher.group("params").split(",").collect {
+                it.trim().split(" ")[0]
+            }
+
+            // Map each type to our hardcoded constant
+            def hardcodedArgs = paramTypes.collect { type ->
+                hardcodedValues.get(type, "0") // Default to "0" if type not found
+            }.join(", ")
+
+            // 3. Generate Strings using hardcoded arguments
             String javaString = """\n@Benchmark
-public $returnType $methodName($params) {
-    return ${targetClassPath}.${methodName}($args);
+public $returnType ${methodName}() {
+    return ${targetClassPath}.${methodName}($hardcodedArgs);
 }"""
 
-            // TODO Benchmarks do not support parameters
             String nativeString = """\n@Benchmark
-public $returnType native_$methodName($params) {
-    return NATIVE.$nativeMethodName($args);
+public $returnType native_${methodName}() {
+    return NATIVE.$nativeMethodName($hardcodedArgs);
 }"""
             benchmarkClassWriter.writeLine(javaString)
             benchmarkClassWriter.writeLine(nativeString)
