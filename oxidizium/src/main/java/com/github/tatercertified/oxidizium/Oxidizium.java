@@ -9,7 +9,7 @@ import java.util.ServiceLoader;
 
 public class Oxidizium implements ModInitializer {
     public static final Logger LOGGER = LoggerFactory.getLogger("Oxidizium");
-    public static NativeInterface MTH = ServiceLoader.load(NativeInterface.class).iterator().next();
+    public static NativeInterface NATIVE = ServiceLoader.load(NativeInterface.class).iterator().next();
     public static Backend BACKEND = ServiceLoader.load(Backend.class).iterator().next();
 
     @Override
