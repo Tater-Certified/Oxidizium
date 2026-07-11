@@ -9,10 +9,7 @@ import imgui.app.Configuration;
 import imgui.flag.ImGuiCol;
 import imgui.flag.ImGuiWindowFlags;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -188,7 +185,7 @@ public class TestingGUI extends Application {
         ImGui.beginChild("InfoBox", boxWidth, boxHeight, true, ImGuiWindowFlags.HorizontalScrollbar);
 
         if (benchmarkComplete) {
-            renderBenchmarkResults(boxWidth, padding);
+            renderBenchmarkResults(boxWidth);
         } else {
             centerText("Test Name", boxWidth, true);
             multiSpace(4);
@@ -324,14 +321,14 @@ public class TestingGUI extends Application {
      * Renders benchmark results in the Info panel.
      * Methods where native is slower than Java are highlighted in red.
      */
-    private static void renderBenchmarkResults(float boxWidth, float padding) {
-        var results = NativeTest.getBenchmarkResults();
+    private static void renderBenchmarkResults(float boxWidth) {
+        List<BenchmarkResult> results = BenchmarkManager.getResults();
 
         centerText("Benchmark Results", boxWidth, true);
         multiSpace(2);
 
         // Summary line
-        long slowerCount = results.stream().filter(BenchmarkResult::nativeSlower).count();
+        long slowerCount = BenchmarkManager.getSlower();
         String summary = String.format("%d methods | %d native slower", results.size(), slowerCount);
         if (slowerCount > 0) {
             ImGui.textColored(ImColor.rgb(255, 80, 80), summary);
@@ -341,10 +338,10 @@ public class TestingGUI extends Application {
         multiSpace(2);
 
         // Column headers
-        centerText("Method", boxWidth, false);
+        centerText("Ratio", boxWidth, false);
         ImGui.sameLine();
         ImGui.setCursorPosX(boxWidth - 60);
-        centerText("Ratio", 60, false);
+        centerText("Method", 60, false);
         multiSpace(1);
 
         // Separator line
@@ -357,15 +354,16 @@ public class TestingGUI extends Application {
 
         // Results (sorted: slower-native first)
         for (BenchmarkResult result : results) {
-            String methodLabel = result.methodName();
-            String ratioText = String.format("%.2fx", result.speedupRatio());
+            String methodLabel = result.getMethodName();
+            double speedImprovement = result.speedImprovement();
+            String ratioText = String.format("%.2fx", Math.abs(speedImprovement));
 
             // Truncate long method names
             if (methodLabel.length() > 25) {
                 methodLabel = methodLabel.substring(0, 22) + "...";
             }
 
-            if (result.nativeSlower()) {
+            if (speedImprovement < 0) {
                 // RED highlighting for native slower than Java
                 ImGui.textColored(ImColor.rgb(255, 60, 60), methodLabel);
                 ImGui.sameLine();
@@ -381,7 +379,7 @@ public class TestingGUI extends Application {
         }
 
         multiSpace(2);
-        centerText(String.format("Iterations: %d", NativeTest.getBenchmarkIterations()), boxWidth, false);
+        centerText(String.format("Seconds per Iteration: %d", NativeTest.getBenchmarkTime()), boxWidth, false);
         multiSpace(1);
         centerText("(ratio = Java time / Native time)", boxWidth, false);
         centerText(">1.0 = native faster, <1.0 = native slower", boxWidth, false);

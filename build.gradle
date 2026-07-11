@@ -559,6 +559,68 @@ tasks.register("generateNativeHooks") {
     nalimInterfaceClassWriter.close()
     membraneInterfaceClassWriter.close()
     panamaImplClassWriter.close()
+
+    // Benchmarks
+    def benchmarkClass = new File("testMod/src/main/java/com/github/tatercertified/oxidizium_tester/test/Benchmarks.java")
+    benchmarkClass.delete();
+    benchmarkClass.createNewFile();
+    def benchmarkClassWriter = benchmarkClass.newWriter(true)
+    benchmarkClassWriter.writeLine("package com.github.tatercertified.oxidizium_tester.test;\nimport org.openjdk.jmh.annotations.*;\nimport java.util.concurrent.TimeUnit;\n@Warmup(iterations = 1, time = 1, timeUnit = TimeUnit.SECONDS)\n@Measurement(iterations = 1, time = NativeTest.BENCHMARK_ITERATIONS_TIME_S, timeUnit = TimeUnit.SECONDS)\n@BenchmarkMode(Mode.AverageTime)\n@OutputTimeUnit(TimeUnit.MICROSECONDS)\npublic class Benchmarks {\n")
+
+    def mixinDir = new File("oxidizium/src/main/java/com/github/tatercertified/oxidizium/mixin")
+    def uniqueSignatures = new HashSet<String>()
+
+    mixinDir.eachFileRecurse() { file ->
+        if (file.isDirectory()) {
+            return
+        }
+        String content = file.text
+
+        // 1. Extract Target Class Name and Path
+        def mixinMatcher = content =~ /@Mixin\(([^.]+)\.class\)/
+        if (!mixinMatcher.find()) return
+
+        String targetClassSimpleName = mixinMatcher.group(1)
+
+        // Find the import for this class
+        def importMatcher = content =~ /import\s+([^;]*\.$targetClassSimpleName);/
+        String targetClassPath = importMatcher.find() ? importMatcher.group(1) : targetClassSimpleName
+
+        // 2. Parse methods
+        // This regex looks for @Overwrite followed by method signature and NATIVE call
+        def methodPattern = /@Overwrite\s+public\s+(?:static\s+)?(?<ret>\w+)\s+(?<name>\w+)\((?<params>[^)]*)\)\s*\{[^}]*NATIVE\.(?<native>\w+)\((?<args>[^)]*)\);/
+
+        (content =~ methodPattern).each { matcher ->
+            String returnType = matcher.group("ret")
+            String methodName = matcher.group("name")
+            String params = matcher.group("params")
+            String nativeMethodName = matcher.group("native")
+            String args = matcher.group("args")
+
+            // Create a unique key for the signature to handle duplicates
+            String signatureKey = "$methodName($params)"
+            if (uniqueSignatures.contains(signatureKey)) return
+            uniqueSignatures.add(signatureKey)
+
+            // 3. Generate Strings
+            // TODO Benchmarks do not support parameters
+            String javaString = """\n@Benchmark
+public $returnType $methodName($params) {
+    return ${targetClassPath}.${methodName}($args);
+}"""
+
+            // TODO Benchmarks do not support parameters
+            String nativeString = """\n@Benchmark
+public $returnType native_$methodName($params) {
+    return NATIVE.$nativeMethodName($args);
+}"""
+            benchmarkClassWriter.writeLine(javaString)
+            benchmarkClassWriter.writeLine(nativeString)
+        }
+    }
+
+    benchmarkClassWriter.writeLine("}")
+    benchmarkClassWriter.close()
 }
 
 
