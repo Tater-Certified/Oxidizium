@@ -408,7 +408,7 @@ tasks.register("generateNativeHooks") {
         membraneInterfaceClass.createNewFile()
     }
     def membraneInterfaceClassWriter = membraneInterfaceClass.newWriter(true)
-    membraneInterfaceClassWriter.writeLine("package com.github.tatercertified.membrane;\nimport com.github.tatercertified.oxidizium.utils.annotation.*;\nimport com.ishland.membraneffi.MembraneFFI;\nimport com.ishland.membraneffi.api.MembraneLinker;\nimport com.ishland.membraneffi.api.annotations.Link;\nimport net.bytebuddy.agent.ByteBuddyAgent;\npublic class OxidiziumLib {System.loadLibrary(System.getProperty(\"oxidizium.native.path\"));\nstatic {MembraneFFI.initialize(ByteBuddyAgent.install());MembraneLinker.linkClass(OxidiziumLib.class);}\n")
+    membraneInterfaceClassWriter.writeLine("package com.github.tatercertified.membrane;\nimport com.github.tatercertified.oxidizium.utils.annotation.*;\nimport com.ishland.membraneffi.MembraneFFI;\nimport com.ishland.membraneffi.api.MembraneLinker;\nimport com.ishland.membraneffi.api.annotations.Link;\nimport net.bytebuddy.agent.ByteBuddyAgent;\npublic class OxidiziumLib {\nstatic {System.loadLibrary(System.getProperty(\"oxidizium.native.path\"));MembraneFFI.initialize(ByteBuddyAgent.install());MembraneLinker.linkClass(OxidiziumLib.class);}\n")
 
     def nalimImplClass = new File("nalim/src/main/java/com/github/tatercertified/nalim/NativeImpl.java")
     nalimImplClass.delete()
