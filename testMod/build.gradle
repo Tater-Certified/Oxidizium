@@ -17,6 +17,7 @@ repositories {
 dependencies {
     // To change the versions see the gradle.properties file
     implementation project(":oxidizium")
+    include(implementation 'org.openjdk.jmh:jmh-core:1.37')
     include(implementation 'io.github.spair:imgui-java-app:1.89.0')
     include(implementation 'io.github.spair:imgui-java-lwjgl3:1.89.0')
     include(implementation 'io.github.spair:imgui-java-binding:1.89.0')

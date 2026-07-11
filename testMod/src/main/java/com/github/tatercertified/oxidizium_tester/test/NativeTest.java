@@ -15,8 +15,10 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Deque;
+import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -26,24 +28,73 @@ public class NativeTest {
     private static final Deque<Runnable> TASKS = new ArrayDeque<>();
     private static int totalRuns = 0;
     private static final AtomicReference<ImInt> RUNS_PER_TEST = new AtomicReference<>(new ImInt(50));
+    private static final int BENCHMARK_ITERATIONS = 10000;
+    private static List<BenchmarkResult> benchmarkResults = new ArrayList<>();
 
     public static void prepareTests() {
-        testFramework("com/github/tatercertified/oxidizium/mixin/MathHelperMixin", "Native Math", Mth.class, RUNS_PER_TEST.get().intValue(), float.class, double.class, int.class, long.class, byte.class, boolean.class);
-        testFramework("com/github/tatercertified/oxidizium/mixin/compat/LithiumMathHelperMixin", "Native Math Lithium Compat", Mth.class, RUNS_PER_TEST.get().intValue(), float.class, double.class, int.class, long.class, byte.class);
+        testFramework("com/github/tatercertified/oxidizium/mixin/MthMixin", "Native Math", Mth.class, RUNS_PER_TEST.get().intValue(), float.class, double.class, int.class, long.class, byte.class, boolean.class);
+        testFramework("com/github/tatercertified/oxidizium/mixin/compat/LithiumMthMixin", "Native Math Lithium Compat", Mth.class, RUNS_PER_TEST.get().intValue(), float.class, double.class, int.class, long.class, byte.class);
         TestingGUI.setTotalTests(totalRuns);
     }
 
     public static void invokeTests() {
         totalRuns = 0;
+        benchmarkResults.clear();
         TestingGUI.reset();
         NativeTest.prepareTests();
         while (!TASKS.isEmpty()) {
             TASKS.poll().run();
         }
+
+        // Run benchmarks after correctness tests
+        OxidiziumTester.TEST_LOGGER.info("Starting benchmark suite ({} iterations per method)", BENCHMARK_ITERATIONS);
+        runBenchmarks("com/github/tatercertified/oxidizium/mixin/MthMixin", "Native Math", Mth.class, float.class, double.class, int.class, long.class, byte.class, boolean.class);
+        runBenchmarks("com/github/tatercertified/oxidizium/mixin/compat/LithiumMthMixin", "Native Math Lithium Compat", Mth.class, float.class, double.class, int.class, long.class, byte.class);
+        TestingGUI.setBenchmarkComplete(true);
+        OxidiziumTester.TEST_LOGGER.info("Benchmark suite complete: {} total results", benchmarkResults.size());
     }
 
     public static ImInt getRunsPerTest() {
         return RUNS_PER_TEST.get();
+    }
+
+    public static List<BenchmarkResult> getBenchmarkResults() {
+        return benchmarkResults;
+    }
+
+    public static int getBenchmarkIterations() {
+        return BENCHMARK_ITERATIONS;
+    }
+
+    /**
+     * Runs benchmarks for a mixin class against its vanilla counterpart.
+     * Each method is benchmarked BENCHMARK_ITERATIONS times for both native and Java.
+     * @param mixinPath Path to the Mixin
+     * @param testName Name shown in UI
+     * @param vanillaClass The vanilla class (e.g. Mth)
+     * @param returnFilter Filter for return types; null for all
+     */
+    public static void runBenchmarks(String mixinPath, String testName, Class<?> vanillaClass, @Nullable Class<?>... returnFilter) {
+        String mixinName = mixinPath.substring(mixinPath.lastIndexOf('/') + 1);
+        String clone = "com/github/tatercertified/oxidizium/Bench" + mixinName;
+        Class<?> mixin;
+        try {
+            mixin = MixinCloner.cloneStaticMethods(mixinPath, clone);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        TestingGUI.setCurrentTestName(testName + " (Benchmark)");
+        TestingGUI.setCurrentClass(vanillaClass.getSimpleName());
+        OxidiziumTester.TEST_LOGGER.info("Benchmarking {} against {}", testName, vanillaClass.getSimpleName());
+
+        List<BenchmarkResult> results = BenchmarkHarness.benchmarkClass(mixin, vanillaClass, BENCHMARK_ITERATIONS, returnFilter);
+        benchmarkResults.addAll(results);
+
+        // Sort: slower-native methods first (most interesting to review)
+        results.sort((a, b) -> Double.compare(b.speedupRatio(), a.speedupRatio()));
+
+        OxidiziumTester.TEST_LOGGER.info("Benchmark complete: {} methods tested", results.size());
     }
 
     /**

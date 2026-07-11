@@ -26,6 +26,7 @@ public class TestingGUI extends Application {
     private static final AtomicInteger TOTAL_TESTS = new AtomicInteger(0);
     private static final AtomicInteger CURRENT_TEST_INDEX = new AtomicInteger(0);
     private static final Semaphore SAFETY_LOCK = new Semaphore(1);
+    private static volatile boolean benchmarkComplete = false;
 
     public static void setCurrentTestName(String name) {
         currentTest = name;
@@ -72,6 +73,11 @@ public class TestingGUI extends Application {
         currentClass = "";
         currentMethod = "";
         currentTest = "";
+        benchmarkComplete = false;
+    }
+
+    public static void setBenchmarkComplete(boolean complete) {
+        benchmarkComplete = complete;
     }
 
     @Override
@@ -181,27 +187,31 @@ public class TestingGUI extends Application {
 
         ImGui.beginChild("InfoBox", boxWidth, boxHeight, true, ImGuiWindowFlags.HorizontalScrollbar);
 
-        centerText("Test Name", boxWidth, true);
-        multiSpace(4);
-        centerText(currentTest, boxWidth, false);
-        multiSpace(6);
-        centerText("Class", boxWidth, true);
-        multiSpace(4);
-        centerText(currentClass, boxWidth, false);
-        multiSpace(6);
-        centerText("Method", boxWidth, true);
-        multiSpace(4);
-        centerText(currentMethod, boxWidth, false);
-        multiSpace(6);
-        centerText("Runs Per Test", boxWidth, true);
-        multiSpace(4);
-        center(boxWidth - padding * 2, boxWidth);
-        ImGui.setNextItemWidth(boxWidth - padding * 2);
-        ImGui.pushStyleColor(ImGuiCol.FrameBg, ImColor.rgb(239, 121, 0));
-        ImGui.inputInt("##Runs", NativeTest.getRunsPerTest(), -1);
-        ImGui.popStyleColor();
-        multiSpace(14);
-        centerText("Run: " + (currentRun.get() + 1), boxWidth, false);
+        if (benchmarkComplete) {
+            renderBenchmarkResults(boxWidth, padding);
+        } else {
+            centerText("Test Name", boxWidth, true);
+            multiSpace(4);
+            centerText(currentTest, boxWidth, false);
+            multiSpace(6);
+            centerText("Class", boxWidth, true);
+            multiSpace(4);
+            centerText(currentClass, boxWidth, false);
+            multiSpace(6);
+            centerText("Method", boxWidth, true);
+            multiSpace(4);
+            centerText(currentMethod, boxWidth, false);
+            multiSpace(6);
+            centerText("Runs Per Test", boxWidth, true);
+            multiSpace(4);
+            center(boxWidth - padding * 2, boxWidth);
+            ImGui.setNextItemWidth(boxWidth - padding * 2);
+            ImGui.pushStyleColor(ImGuiCol.FrameBg, ImColor.rgb(239, 121, 0));
+            ImGui.inputInt("##Runs", NativeTest.getRunsPerTest(), -1);
+            ImGui.popStyleColor();
+            multiSpace(14);
+            centerText("Run: " + (currentRun.get() + 1), boxWidth, false);
+        }
 
         ImGui.endChild();
 
@@ -308,5 +318,72 @@ public class TestingGUI extends Application {
         for (int i = 0; i < times; i++) {
             ImGui.spacing();
         }
+    }
+
+    /**
+     * Renders benchmark results in the Info panel.
+     * Methods where native is slower than Java are highlighted in red.
+     */
+    private static void renderBenchmarkResults(float boxWidth, float padding) {
+        var results = NativeTest.getBenchmarkResults();
+
+        centerText("Benchmark Results", boxWidth, true);
+        multiSpace(2);
+
+        // Summary line
+        long slowerCount = results.stream().filter(BenchmarkResult::nativeSlower).count();
+        String summary = String.format("%d methods | %d native slower", results.size(), slowerCount);
+        if (slowerCount > 0) {
+            ImGui.textColored(ImColor.rgb(255, 80, 80), summary);
+        } else {
+            ImGui.text(summary);
+        }
+        multiSpace(2);
+
+        // Column headers
+        centerText("Method", boxWidth, false);
+        ImGui.sameLine();
+        ImGui.setCursorPosX(boxWidth - 60);
+        centerText("Ratio", 60, false);
+        multiSpace(1);
+
+        // Separator line
+        float sepX1 = 5;
+        float sepX2 = boxWidth - 5;
+        float sepY = ImGui.getItemRectMaxY();
+        ImDrawList drawList = ImGui.getWindowDrawList();
+        drawList.addLine(sepX1, sepY, sepX2, sepY, ImGui.getColorU32(ImGuiCol.TextDisabled));
+        multiSpace(1);
+
+        // Results (sorted: slower-native first)
+        for (BenchmarkResult result : results) {
+            String methodLabel = result.methodName();
+            String ratioText = String.format("%.2fx", result.speedupRatio());
+
+            // Truncate long method names
+            if (methodLabel.length() > 25) {
+                methodLabel = methodLabel.substring(0, 22) + "...";
+            }
+
+            if (result.nativeSlower()) {
+                // RED highlighting for native slower than Java
+                ImGui.textColored(ImColor.rgb(255, 60, 60), methodLabel);
+                ImGui.sameLine();
+                ImGui.setCursorPosX(boxWidth - 60);
+                ImGui.textColored(ImColor.rgb(255, 60, 60), ratioText);
+            } else {
+                ImGui.text(methodLabel);
+                ImGui.sameLine();
+                ImGui.setCursorPosX(boxWidth - 60);
+                ImGui.text(ratioText);
+            }
+            ImGui.spacing();
+        }
+
+        multiSpace(2);
+        centerText(String.format("Iterations: %d", NativeTest.getBenchmarkIterations()), boxWidth, false);
+        multiSpace(1);
+        centerText("(ratio = Java time / Native time)", boxWidth, false);
+        centerText(">1.0 = native faster, <1.0 = native slower", boxWidth, false);
     }
 }
