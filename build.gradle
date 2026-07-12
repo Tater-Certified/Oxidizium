@@ -561,6 +561,7 @@ tasks.register("generateNativeHooks") {
     panamaImplClassWriter.close()
 
     // Benchmarks
+    /*
     def hardcodedValues = [
             "byte":    "2",
             "short":   "5",
@@ -638,6 +639,8 @@ public $returnType native_${methodName}() {
 
     benchmarkClassWriter.writeLine("}")
     benchmarkClassWriter.close()
+
+     */
 }
 
 

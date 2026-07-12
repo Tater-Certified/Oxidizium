@@ -783,7 +783,7 @@ public class MthMixin {
     // @Config(name = "float lerp deg")
     @Overwrite
     public static float rotLerp(float delta, float start, float end) {
-        return NATIVE.lerp_angle_radians(delta, start, end);
+        return NATIVE.lerp_angle_degrees_float(delta, start, end);
     }
 
     /**
@@ -827,7 +827,7 @@ public class MthMixin {
     @IfMinecraftVersion(minVersion = "1.16")
     @Overwrite
     public static float square(float n) {
-        return NATIVE.sqrt_float(n);
+        return NATIVE.square_float(n);
     }
 
     /**

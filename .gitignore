@@ -47,3 +47,4 @@ panama/src/main/java/com/github/tatercertified/panama/NativeImpl.java
 /panama/bin
 /testMod/bin
 /membrane/bin
+/membrane/build
