@@ -1,9 +1,8 @@
-use once_cell::sync::Lazy;
+use mimalloc::MiMalloc;
+use oxidizium_macros::validate_params;
 use std::ffi::c_ushort;
 use std::num::Wrapping;
 use std::slice;
-use mimalloc::MiMalloc;
-use oxidizium_macros::validate_params;
 
 #[global_allocator]
 static GLOBAL: MiMalloc = MiMalloc;
@@ -20,43 +19,8 @@ const INVERSE_SQRT: u64 = 6910469410427058090;
 const INVERSE_SQRT_F32: u32 = 1597463007;
 const PACK: f32 = 256.0_f32 / 360.0_f32;
 
-static SINE_TABLE: Lazy<[f32; 65536]> = Lazy::new(|| {
-    let mut table = [0.0_f32; 65536];
-    for (i, value) in table.iter_mut().enumerate() {
-        *value = (i as f64 * DOUBLE_PI / 65536.0).sin() as f32;
-    }
-    table
-});
-
-// From Lithium https://github.com/CaffeineMC/lithium/blob/develop/com/src/main/java/net/caffeinemc/mods/lithium/com/util/math/CompactSineLUT.java
-static SINE_TABLE_OPT: Lazy<[u32; 16385]> = Lazy::new(|| {
-    let mut table = [0u32; 16385];
-    for (i, value) in table.iter_mut().enumerate() {
-        *value = (SINE_TABLE[i]).to_bits();
-    }
-    table
-});
-
-// From Lithium https://github.com/CaffeineMC/lithium/blob/develop/com/src/main/java/net/caffeinemc/mods/lithium/com/util/math/CompactSineLUT.java
-static SINE_TABLE_MIDPOINT_OPT: Lazy<f32> = Lazy::new(|| SINE_TABLE[SINE_TABLE.len() / 2_usize]);
-
-static ARCSIN_TABLE: Lazy<[f64; 257]> = Lazy::new(|| {
-    let mut table = [0.0; 257];
-    for (i, value) in table.iter_mut().enumerate() {
-        let d = i as f64 / 256.0;
-        *value = d.asin();
-    }
-    table
-});
-
-static COSIN_OF_ARCSIN_TABLE: Lazy<[f64; 257]> = Lazy::new(|| {
-    let mut table = [0.0; 257];
-    for (i, value) in table.iter_mut().enumerate() {
-        let d = i as f64 / 256.0;
-        *value = d.asin().cos();
-    }
-    table
-});
+// Pre-computed at compile time by build.rs for zero-overhead access (like Java's static final)
+include!(concat!(env!("OUT_DIR"), "/math_tables.rs"));
 
 /// Computes the sine of an input, x, in radians
 #[no_mangle]
@@ -84,7 +48,7 @@ pub extern "C" fn cos_double(x: f64) -> f32 {
 
 fn lookup(index: i32) -> f32 {
     if index == 32768 {
-        return *SINE_TABLE_MIDPOINT_OPT;
+        return SINE_TABLE_MIDPOINT_OPT;
     }
 
     let neg: i32 = (index & 0x8000) << 16;
@@ -512,7 +476,9 @@ pub extern "C" fn floor_log_2(value: i32) -> i32 {
 /// Compresses an RGB value into a single int
 #[no_mangle]
 pub extern "C" fn pack_rgb(red: f32, green: f32, blue: f32) -> u32 {
-    (((red * 255.0_f32) as u32) << 16) | (((green * 255.0_f32) as u32) << 8) | (blue * 255.0_f32) as u32
+    (((red * 255.0_f32) as u32) << 16)
+        | (((green * 255.0_f32) as u32) << 8)
+        | (blue * 255.0_f32) as u32
 }
 
 /// Gets the fractional part of a float
@@ -655,14 +621,23 @@ pub extern "C" fn fast_inverse_cbrt(#[nonzero] x: f32) -> f32 {
 /// Converts HSV to RGB Values
 #[no_mangle]
 #[validate_params]
-pub extern "C" fn hsv_to_rgb(#[positive_only] hue: f32, #[positive_only] saturation: f32, #[positive_only] value: f32) -> i32 {
+pub extern "C" fn hsv_to_rgb(
+    #[positive_only] hue: f32,
+    #[positive_only] saturation: f32,
+    #[positive_only] value: f32,
+) -> i32 {
     hsv_to_argb(hue, saturation, value, 0)
 }
 
 /// Converts HSV to ARGB values
 #[no_mangle]
 #[validate_params]
-pub extern "C" fn hsv_to_argb(#[positive_only] hue: f32, #[positive_only] saturation: f32, #[positive_only] value: f32, #[positive_only] alpha: i32) -> i32 {
+pub extern "C" fn hsv_to_argb(
+    #[positive_only] hue: f32,
+    #[positive_only] saturation: f32,
+    #[positive_only] value: f32,
+    #[positive_only] alpha: i32,
+) -> i32 {
     let i = (hue * 6.0).floor() as i32 % 6;
     let f = hue * 6.0 - i as f32;
     let g = value * (1.0 - saturation);
@@ -732,7 +707,14 @@ pub extern "C" fn lerp_positive(delta: f32, start: i32, end: i32) -> i32 {
 
 /// Two-dimensional Linear Interpolation
 #[no_mangle]
-pub extern "C" fn lerp_2(deltax: f64, deltay: f64, x0y0: f64, x1y0: f64, x0y1: f64, x1y1: f64) -> f64 {
+pub extern "C" fn lerp_2(
+    deltax: f64,
+    deltay: f64,
+    x0y0: f64,
+    x1y0: f64,
+    x0y1: f64,
+    x1y1: f64,
+) -> f64 {
     lerp_double(
         deltay,
         lerp_double(deltax, x0y0, x1y0),
@@ -742,7 +724,19 @@ pub extern "C" fn lerp_2(deltax: f64, deltay: f64, x0y0: f64, x1y0: f64, x0y1: f
 
 /// Three-dimensional Linear Interpolation
 #[no_mangle]
-pub extern "C" fn lerp_3(delta_x: f64, delta_y: f64, delta_z: f64, x0y0z0: f64, x1y0z0: f64, x0y1z0: f64, x1y1z0: f64, x0y0z1: f64, x1y0z1: f64, x0y1z1: f64, x1y1z1: f64) -> f64 {
+pub extern "C" fn lerp_3(
+    delta_x: f64,
+    delta_y: f64,
+    delta_z: f64,
+    x0y0z0: f64,
+    x1y0z0: f64,
+    x0y1z0: f64,
+    x1y1z0: f64,
+    x0y0z1: f64,
+    x1y0z1: f64,
+    x0y1z1: f64,
+    x1y1z1: f64,
+) -> f64 {
     lerp_double(
         delta_z,
         lerp_2(delta_x, delta_y, x0y0z0, x1y0z0, x0y1z0, x1y1z0),
@@ -842,7 +836,13 @@ pub extern "C" fn square_long(value: i64) -> i64 {
 
 /// Linearly maps a value from one number range to another and clamps the result
 #[no_mangle]
-pub extern "C" fn clamped_map_double(value: f64, old_start: f64, old_end: f64, new_start: f64, new_end: f64) -> f64 {
+pub extern "C" fn clamped_map_double(
+    value: f64,
+    old_start: f64,
+    old_end: f64,
+    new_start: f64,
+    new_end: f64,
+) -> f64 {
     clamp_lerp_double(
         new_start,
         new_end,
@@ -852,7 +852,13 @@ pub extern "C" fn clamped_map_double(value: f64, old_start: f64, old_end: f64, n
 
 /// Linearly maps a value from one number range to another and clamps the result
 #[no_mangle]
-pub extern "C" fn clamped_map_float(value: f32, old_start: f32, old_end: f32, new_start: f32, new_end: f32) -> f32 {
+pub extern "C" fn clamped_map_float(
+    value: f32,
+    old_start: f32,
+    old_end: f32,
+    new_start: f32,
+    new_end: f32,
+) -> f32 {
     clamp_lerp_float(
         new_start,
         new_end,
@@ -862,7 +868,13 @@ pub extern "C" fn clamped_map_float(value: f32, old_start: f32, old_end: f32, ne
 
 /// Linearly maps a value from one number range to another, unclamped
 #[no_mangle]
-pub extern "C" fn map_double(value: f64, old_start: f64, old_end: f64, new_start: f64, new_end: f64) -> f64 {
+pub extern "C" fn map_double(
+    value: f64,
+    old_start: f64,
+    old_end: f64,
+    new_start: f64,
+    new_end: f64,
+) -> f64 {
     lerp_double(
         get_lerp_progress_double(value, old_start, old_end),
         new_start,
@@ -872,7 +884,13 @@ pub extern "C" fn map_double(value: f64, old_start: f64, old_end: f64, new_start
 
 /// Linearly maps a value from one number range to another, unclamped
 #[no_mangle]
-pub extern "C" fn map_float(value: f32, old_start: f32, old_end: f32, new_start: f32, new_end: f32) -> f32 {
+pub extern "C" fn map_float(
+    value: f32,
+    old_start: f32,
+    old_end: f32,
+    new_start: f32,
+    new_end: f32,
+) -> f32 {
     lerp_float(
         get_lerp_progress_float(value, old_start, old_end),
         new_start,
