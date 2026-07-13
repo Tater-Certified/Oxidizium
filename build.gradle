@@ -372,114 +372,101 @@ tasks.register("generateNativeHooks") {
     panamaImplClassWriter.writeLine("package com.github.tatercertified.panama;\nimport com.github.tatercertified.oxidizium.NativeInterface;\nimport com.github.tatercertified.oxidizium.utils.annotation.*;\nimport com.github.tatercertified.rust.lib_h;\npublic class NativeImpl implements NativeInterface {")
 
     nativesDir.eachFileRecurse { file ->
-        if (!file.isDirectory()) {
-            boolean nextLineImportant
-            boolean modifiersPresent
-            file.eachLine {line ->
-                if (line.startsWith("#[validate_params]")) {
-                    modifiersPresent = true
+        if (file.directory) return
 
-                } else if (nextLineImportant) {
+        StringBuilder buffer = new StringBuilder()
+        boolean inFunction = false
+        boolean modifiersPresent = false
+
+        file.eachLine { line ->
+            String trimmed = line.trim()
+
+            if (trimmed.startsWith("#[validate_params]")) {
+                modifiersPresent = true
+            }
+
+            if (trimmed.startsWith("#[no_mangle]")) {
+                inFunction = true
+                buffer.setLength(0)
+            }
+
+            if (inFunction) {
+                buffer.append(line).append(" ")
+
+                if (trimmed.contains(")")) {
+                    String fullSignature = buffer.toString()
+                    inFunction = false
+
                     def pattern = /fn\s+(?<name>\w+)\s*\((?<params>[^)]*)\)\s*(->\s*(?<return>[^{]+))?/
-                    def matcher = line =~ pattern
+                    def matcher = fullSignature =~ pattern
 
                     if (matcher.find()) {
-                        // Get the function name
                         def functionName = matcher.group("name")
-                        // Get parameters
                         def rawParams = matcher.group("params")
-                        // Handle no return type
                         def returnType = matcher.group("return")?.trim() ?: "void"
+
                         String javaReturnType = switch (returnType) {
-                            case "f32" -> "float"
-                            case "f64" -> "double"
-                            case "u8", "i8" -> "byte"
-                            case "u16", "i16" -> "short"
-                            case "u32", "i32" -> "int"
-                            case "u64", "i64" -> "long"
-                            case "bool" -> "boolean"
-                            default -> throw new IllegalStateException("Unknown type: " + returnType)
+                            case "f32" -> "float"; case "f64" -> "double"
+                            case "u8", "i8" -> "byte"; case "u16", "i16" -> "short"
+                            case "u32", "i32" -> "int"; case "u64", "i64" -> "long"
+                            case "bool" -> "boolean"; default -> "void"
                         }
 
                         List<String> parameterNames = new ArrayList<>()
+                        List<String> parsedParams = rawParams.split(",").findAll { !it.trim().isEmpty() }.collect { param ->
+                            def parts = param.split(":")
+                            String rawParamName = parts[0].trim()
+                            String rustType = parts[1].trim()
 
-                        def params = rawParams.split(",")
-                                .findAll { !it.trim().isEmpty() }
-                                .collect { param ->
-                                    def parts = param.split(":")
-                                    String rawParamName = parts[0].trim()
-                                    String rustType = parts[1].trim()
-
-                                    String modifierValue = null
-
-                                    if (modifiersPresent) {
-                                        def attributeMatcher = rawParamName =~ /#\[[^]]+]/
-                                        if (attributeMatcher.find()) {
-                                            modifierValue = attributeMatcher.group(0)
-                                            rawParamName = attributeMatcher.replaceAll("").trim()
-                                        }
-                                    }
-
-                                    java.util.Optional<String> parameterModifier = java.util.Optional.ofNullable(modifierValue)
-
-                                    String paramName = rawParamName.replace("mut ", "")
-                                    parameterNames.add(paramName)
-
-                                    // 5. Convert the Rust type to Java type
-                                    String javaType = switch (rustType) {
-                                        case "f32" -> "float"
-                                        case "f64" -> "double"
-                                        case "u8", "i8" -> "byte"
-                                        case "u16", "i16" -> "short"
-                                        case "u32", "i32" -> "int"
-                                        case "u64", "i64" -> "long"
-                                        case "bool" -> "boolean"
-                                        default -> throw new IllegalStateException("Unknown type: " + rustType)
-                                    }
-
-                                    if (parameterModifier.isPresent()) {
-                                        String modifier = switch (parameterModifier.get()) {
-                                            case "#[max]" -> "@Max"
-                                            case "#[min]" -> "@Min"
-                                            case "#[nonzero]" -> "@NonZero"
-                                            case "#[positive_only]" -> "@PositiveOnly"
-                                            case String -> throw new IllegalStateException("Unknown modifier: " + parameterModifier.get())
-                                        }
-                                        return "${modifier} ${javaType} ${paramName}"
-                                    } else {
-                                        return "${javaType} ${paramName}"
-                                    }
+                            String modifierValue = null
+                            if (modifiersPresent) {
+                                def attributeMatcher = rawParamName =~ /#\[[^]]+]/
+                                if (attributeMatcher.find()) {
+                                    modifierValue = attributeMatcher.group(0)
+                                    rawParamName = attributeMatcher.replaceAll("").trim()
                                 }
+                            }
 
-                        // Main Interface
-                        String javaMethod = "${javaReturnType} ${functionName}(${params.join(', ')});"
-                        interfaceClassWriter.writeLine(javaMethod)
+                            String paramName = rawParamName.replace("mut ", "")
+                            parameterNames.add(paramName)
 
-                        // Nalim
-                        String nalimNativeMethod = "\n@Link\npublic static native ${javaReturnType} ${functionName}(${params.join(', ')});"
-                        nalimInterfaceClassWriter.writeLine(nalimNativeMethod)
+                            String javaType = switch (rustType) {
+                                case "f32" -> "float"; case "f64" -> "double"
+                                case "u8", "i8" -> "byte"; case "u16", "i16" -> "short"
+                                case "u32", "i32" -> "int"; case "u64", "i64" -> "long"
+                                case "bool" -> "boolean"; default -> "int"
+                            }
 
-                        // Membrane (requires explicit symbol name)
-                        String membraneNativeMethod = "\n@Link(\"${functionName}\")\npublic static native ${javaReturnType} ${functionName}(${params.join(', ')});"
-                        membraneInterfaceClassWriter.writeLine(membraneNativeMethod)
+                            if (modifierValue) {
+                                String modifier = switch (modifierValue) {
+                                    case "#[max]" -> "@Max"; case "#[min]" -> "@Min"
+                                    case "#[nonzero]" -> "@NonZero"; case "#[positive_only]" -> "@PositiveOnly"
+                                    default -> ""
+                                }
+                                return "${modifier} ${javaType} ${paramName}".trim()
+                            }
+                            return "${javaType} ${paramName}"
+                        }
 
-                        String nalimMembraneJavaOverride = "\n@Override\npublic ${javaReturnType} ${functionName}(${params.join(', ')}) {\n\treturn OxidiziumLib.${functionName}(${parameterNames.join(', ')});\n}"
-                        nalimImplClassWriter.writeLine(nalimMembraneJavaOverride)
-                        membraneImplClassWriter.writeLine(nalimMembraneJavaOverride)
+                        String paramsJoined = parsedParams.join(', ')
+                        interfaceClassWriter.writeLine("${javaReturnType} ${functionName}(${paramsJoined});")
 
-                        // Panama
-                        String panamaJavaOverride = "\n@Override\npublic ${javaReturnType} ${functionName}(${params.join(', ')}) {\n\treturn lib_h.${functionName}(${parameterNames.join(', ')});\n}"
-                        panamaImplClassWriter.writeLine(panamaJavaOverride)
+                        String nalimMethod = "\n@Link\npublic static native ${javaReturnType} ${functionName}(${paramsJoined});"
+                        nalimInterfaceClassWriter.writeLine(nalimMethod)
+
+                        String membraneMethod = "\n@Link(\"${functionName}\")\npublic static native ${javaReturnType} ${functionName}(${paramsJoined});"
+                        membraneInterfaceClassWriter.writeLine(membraneMethod)
+
+                        String implOverride = "\n@Override\npublic ${javaReturnType} ${functionName}(${paramsJoined}) {\n\treturn OxidiziumLib.${functionName}(${parameterNames.join(', ')});\n}"
+                        nalimImplClassWriter.writeLine(implOverride)
+                        membraneImplClassWriter.writeLine(implOverride)
+
+                        panamaImplClassWriter.writeLine("\n@Override\npublic ${javaReturnType} ${functionName}(${paramsJoined}) {\n\treturn lib_h.${functionName}(${parameterNames.join(', ')});\n}")
                     }
-
-                    nextLineImportant = false
                     modifiersPresent = false
-                } else if (line.startsWith("#[no_mangle]")) {
-                    nextLineImportant = true
                 }
-
-                true // Return a random object to make Groovy happy
             }
+            true
         }
     }
 

@@ -13,7 +13,6 @@ const MULTIPLY_DE_BRUIJN_BIT_POS: [i8; 32] = [
     12, 18, 6, 11, 5, 10, 9,
 ];
 const ROUNDER_256THS: f64 = f64::from_bits(4805340802404319232);
-const DOUBLE_PI: f64 = std::f64::consts::PI * 2.0_f64;
 const DOUBLE_PI_F32: f32 = std::f32::consts::PI * 2.0_f32;
 const INVERSE_SQRT: u64 = 6910469410427058090;
 const INVERSE_SQRT_F32: u32 = 1597463007;
@@ -229,14 +228,6 @@ pub extern "C" fn abs_max_difference(i: i32, j: i32, k: i32, l: i32) -> i32 {
 #[no_mangle]
 #[validate_params]
 pub extern "C" fn floor_div(dividend: i32, #[nonzero] divisor: i32) -> i32 {
-    (dividend as f32 / divisor as f32).floor() as i32
-}
-
-pub fn floor_div_i64(dividend: i64, divisor: i64) -> i64 {
-    (dividend as f64 / divisor as f64).floor() as i64
-}
-
-pub fn floor_div_i32(dividend: i32, divisor: i32) -> i32 {
     (dividend as f32 / divisor as f32).floor() as i32
 }
 
@@ -990,24 +981,28 @@ pub extern "C" fn is_power_of_2(value: i64) -> bool {
 
 /// Rounds towards the nearest multiple
 #[no_mangle]
-pub extern "C" fn round_towards_long(input: i64, multiple: i64) -> i64 {
+#[validate_params]
+pub extern "C" fn round_towards_long(input: i64, #[nonzero] multiple: i64) -> i64 {
     positive_ceil_div_long(input, multiple) * multiple
 }
 
 /// Rounds towards the nearest multiple
 #[no_mangle]
-pub extern "C" fn round_towards_int(input: i32, multiple: i32) -> i32 {
+#[validate_params]
+pub extern "C" fn round_towards_int(input: i32, #[nonzero] multiple: i32) -> i32 {
     positive_ceil_div_int(input, multiple) * multiple
 }
 
 /// Ceil divide, but always positive
 #[no_mangle]
-pub extern "C" fn positive_ceil_div_long(input: i64, divisor: i64) -> i64 {
-    -floor_div_i64(-input, divisor)
+#[validate_params]
+pub extern "C" fn positive_ceil_div_long(input: i64, #[nonzero] divisor: i64) -> i64 {
+    (input + divisor - 1) / divisor
 }
 
 /// Ceil divide, but always positive
 #[no_mangle]
-pub extern "C" fn positive_ceil_div_int(input: i32, divisor: i32) -> i32 {
-    -floor_div_i32(-input, divisor)
+#[validate_params]
+pub extern "C" fn positive_ceil_div_int(input: i32, #[nonzero] divisor: i32) -> i32 {
+    (input + divisor - 1) / divisor
 }

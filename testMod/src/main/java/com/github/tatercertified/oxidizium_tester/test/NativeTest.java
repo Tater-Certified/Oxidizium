@@ -1,7 +1,6 @@
 package com.github.tatercertified.oxidizium_tester.test;
 
 import com.github.tatercertified.oxidizium.Config;
-import com.github.tatercertified.oxidizium.utils.MappingTranslator;
 import com.github.tatercertified.oxidizium.utils.annotation.*;
 import com.github.tatercertified.oxidizium_tester.OxidiziumTester;
 import com.github.tatercertified.oxidizium_tester.utils.MixinCloner;
@@ -95,15 +94,13 @@ public class NativeTest {
             TestingGUI.setCurrentClass(vanillaClass.getSimpleName());
             for (int i = 0; i < runs; i++) {
                 TestingGUI.setCurrentRun(i);
-                String intermediaryClassName = MappingTranslator.toIntermediary(vanillaClass);
                 for (Method method : mixin.getDeclaredMethods()) {
                     try {
-                        String remappedMethodName = MappingTranslator.remapMethodName(intermediaryClassName, method.getName(), method.getReturnType(), method.getParameterTypes());
-                        Method vanillaMethod = vanillaClass.getMethod(remappedMethodName, method.getParameterTypes());
+                        Method vanillaMethod = vanillaClass.getMethod(method.getName(), method.getParameterTypes());
                         if (returnFilter == null || Arrays.stream(returnFilter).anyMatch(clazz -> clazz == method.getReturnType())) {
-                            TestingGUI.setCurrentMethod(formatMethod(remappedMethodName, vanillaMethod));
+                            TestingGUI.setCurrentMethod(formatMethod(method.getName(), vanillaMethod));
                             try {
-                                invokeAndTest(method, vanillaMethod, remappedMethodName);
+                                invokeAndTest(method, vanillaMethod, method.getName());
                             } catch (Exception e) {
                                 String error;
                                 if (e instanceof InvocationTargetException exception) {
@@ -111,7 +108,7 @@ public class NativeTest {
                                 } else {
                                     error = e.toString();
                                 }
-                                TestingGUI.addError(formatMethod(remappedMethodName, vanillaMethod), false, error);
+                                TestingGUI.addError(formatMethod(method.getName(), vanillaMethod), false, error);
                             }
                         }
                     } catch (NoSuchMethodException _) {
@@ -125,12 +122,10 @@ public class NativeTest {
 
     private static int getTotalTestedMethods(Class<?> clazz, Class<?> vanillaClass, @Nullable Class<?>... returnFilter) {
         int count = 0;
-        String intermediaryClassName = MappingTranslator.toIntermediary(vanillaClass);
         for (Method method : clazz.getDeclaredMethods()) {
             if (Arrays.stream(returnFilter).anyMatch(clazz1 -> clazz1 == method.getReturnType())) {
                 try {
-                    String remappedMethodName = MappingTranslator.remapMethodName(intermediaryClassName, method.getName(), method.getReturnType(), method.getParameterTypes());
-                    vanillaClass.getMethod(remappedMethodName, method.getParameterTypes());
+                    vanillaClass.getMethod(method.getName(), method.getParameterTypes());
                 } catch (NoSuchMethodException e) {
                     continue;
                 }
@@ -173,6 +168,8 @@ public class NativeTest {
 
         Object nativeResult = nativeMethod.invoke(null, args);
         Object javaResult = javaMethod.invoke(null, args);
+
+        OxidiziumTester.TEST_LOGGER.info("Native: {}, Java: {}", nativeResult, javaResult);
 
         boolean resultsEqual = areResultsEquivalent(nativeResult, javaResult, nativeMethod.getReturnType(), javaMethod, remappedMethodName);
 
