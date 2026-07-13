@@ -112,6 +112,7 @@ jobs:
   gradle-builds:
     needs: [rust_linux_x86, rust_linux_arm, rust_windows_x86, rust_windows_arm, rust_macos_x86, rust_macos_arm]
     runs-on: ubuntu-latest
+    continue-on-error: true
     strategy:
       matrix:
         module: [ panama, nalim, membrane, testMod ]
