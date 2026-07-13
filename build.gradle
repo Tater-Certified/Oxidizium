@@ -1,8 +1,6 @@
 import java.nio.file.Files
 import java.nio.file.StandardCopyOption
 import java.security.MessageDigest
-import groovy.json.JsonSlurper
-import groovy.json.JsonOutput
 
 plugins {
     id 'net.fabricmc.fabric-loom' version '1.17-SNAPSHOT' apply false
@@ -115,20 +113,23 @@ tasks.register('modifyGeneratedJava') {
     dependsOn tasks.named('runJextract')
 
     doLast {
-        println "Modifying generated Java file..."
+        println "Modifying generated Java Panama file..."
         def generatedFile = file("panama/src/main/java/com/github/tatercertified/rust/lib_h.java")
 
         if (generatedFile.exists()) {
             def text = generatedFile.text
-            text = text.replaceAll(
-                    'Linker\\.Option\\.critical\\(false\\)',
-                    'Linker.Option.critical(true)'
-            )
-            text = text.replaceAll(
-                    'public static final MethodHandle HANDLE = Linker\\.nativeLinker\\(\\)\\.downcallHandle\\(ADDR, DESC\\);',
-                    'public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC, Linker.Option.critical(true));'
-            )
+            def totalReplacements = 0
+
+            def pattern1 = 'Linker\\.Option\\.critical\\(false\\)'
+            totalReplacements += (text =~ pattern1).count
+            text = text.replaceAll(pattern1, 'Linker.Option.critical(true)')
+
+            def pattern2 = 'public static final MethodHandle HANDLE = Linker\\.nativeLinker\\(\\)\\.downcallHandle\\(ADDR, DESC\\);'
+            totalReplacements += (text =~ pattern2).count
+            text = text.replaceAll(pattern2, 'public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC, Linker.Option.critical(true));')
+
             generatedFile.text = text
+            println "Modification complete. ${totalReplacements} lines optimized."
         } else {
             throw new GradleException("Generated Java file not found: ${generatedFile}")
         }
@@ -306,79 +307,15 @@ tasks.register('postRust') {
 
 tasks.register('compileLocally') {
     dependsOn tasks.named('postRust')
-    dependsOn tasks.named('copyOxidiziumResources')
     dependsOn project(':panama').tasks.named('build')
     dependsOn project(':nalim').tasks.named('build')
     dependsOn project(':membrane').tasks.named('build')
+    dependsOn project(':testMod').tasks.named('build')
 }
 
 tasks.register('devOxidizumBuild') {
     dependsOn project(':testMod').tasks.named('build')
     mustRunAfter 'postRust'
-}
-
-tasks.register("copyOxidiziumResources") {
-    def sourceDir = file("oxidizium/src/main/resources")
-    def targets = [
-            file("panama/src/main/resources"),
-            file("nalim/src/main/resources"),
-            file("membrane/src/main/resources")
-    ]
-
-    doLast {
-        if (!sourceDir.exists()) {
-            println "No oxidizium resources found at ${sourceDir}, skipping."
-            return
-        }
-
-        targets.each { targetDir ->
-            println "Copying selected resources from ${sourceDir} → ${targetDir}"
-
-            // Copy assets and META-INF folders
-            copy {
-                from sourceDir
-                into targetDir
-                include 'assets/**'
-            }
-
-            // Copy fabric.mod.json
-            def sourceJson = new File(sourceDir, "fabric.mod.json")
-            if (!sourceJson.exists()) {
-                println "No fabric.mod.json found in ${sourceDir}, skipping JSON modification."
-                return
-            }
-
-            def targetJson = new File(targetDir, "fabric.mod.json")
-            copy {
-                from sourceJson
-                into targetDir
-            }
-
-            // Read JSON
-            def jsonSlurper = new JsonSlurper()
-            def jsonContent = jsonSlurper.parse(targetJson)
-
-            // Remove unwanted sections
-            jsonContent.remove("entrypoints")
-            if (targetDir.getAbsolutePath().contains("nalim")) {
-                jsonContent.remove("mixins")
-            } else if (jsonContent.mixins instanceof List) {
-                jsonContent.mixins = jsonContent.mixins.collect { mixin ->
-                    mixin == "oxidizium.mixins.json"
-                            ? "oxidizium_panama.mixins.json"
-                            : mixin
-                }
-            }
-            jsonContent.remove("custom")
-
-            // Write back formatted JSON
-            targetJson.text = JsonOutput.prettyPrint(JsonOutput.toJson(jsonContent))
-
-            println "Copied and cleaned fabric.mod.json for ${targetDir}"
-        }
-
-        println "Selected resources copied and cleaned successfully."
-    }
 }
 
 // - - - - Code Generation - - - - \\
@@ -559,88 +496,92 @@ tasks.register("generateNativeHooks") {
     nalimInterfaceClassWriter.close()
     membraneInterfaceClassWriter.close()
     panamaImplClassWriter.close()
+}
 
-    // Benchmarks
-    /*
-    def hardcodedValues = [
-            "byte":    "2",
-            "short":   "5",
-            "int":     "10",
-            "long":    "100L",
-            "float":   "0.25F",
-            "double":  "100.5",
-            "boolean": "true"
-    ]
+tasks.register("generateBenchmarks") {
+    println 'Generating Benchmarks'
 
-    def benchmarkClass = new File("testMod/src/main/java/com/github/tatercertified/oxidizium_tester/test/Benchmarks.java")
-    benchmarkClass.delete();
-    benchmarkClass.createNewFile();
-    def benchmarkClassWriter = benchmarkClass.newWriter(true)
-    benchmarkClassWriter.writeLine("package com.github.tatercertified.oxidizium_tester.test;\nimport org.openjdk.jmh.annotations.*;\nimport java.util.concurrent.TimeUnit;\n@Warmup(iterations = 1, time = 1, timeUnit = TimeUnit.SECONDS)\n@Measurement(iterations = 1, time = NativeTest.BENCHMARK_ITERATIONS_TIME_S, timeUnit = TimeUnit.SECONDS)\n@BenchmarkMode(Mode.AverageTime)\n@OutputTimeUnit(TimeUnit.MICROSECONDS)\npublic class Benchmarks {\n")
+    // Helper to compare Minecraft versions
+    def checkVersion = { constraint ->
+        def current = project.hasProperty('minecraft_version') ? project.minecraft_version : "99.9.9"
+        def min = (constraint =~ /minVersion\s*=\s*"([^"]+)"/).find() ? (constraint =~ /minVersion\s*=\s*"([^"]+)"/)[0][1] : "0.0.0"
+        def max = (constraint =~ /maxVersion\s*=\s*"([^"]+)"/).find() ? (constraint =~ /maxVersion\s*=\s*"([^"]+)"/)[0][1] : "99.9.9"
 
-    def mixinDir = new File("oxidizium/src/main/java/com/github/tatercertified/oxidizium/mixin")
-    def uniqueSignatures = new HashSet<String>()
-
-    mixinDir.eachFileRecurse() { file ->
-        if (file.isDirectory()) {
-            return
-        }
-        String content = file.text
-
-        // 1. Extract Target Class Name and Path
-        def mixinMatcher = content =~ /@Mixin\(([^.]+)\.class\)/
-        if (!mixinMatcher.find()) return
-
-        String targetClassSimpleName = mixinMatcher.group(1)
-
-        // Find the import for this class
-        def importMatcher = content =~ /import\s+([^;]*\.$targetClassSimpleName);/
-        String targetClassPath = importMatcher.find() ? importMatcher.group(1) : targetClassSimpleName
-
-        // 2. Parse methods
-        // This regex looks for @Overwrite followed by method signature and NATIVE call
-        def methodPattern = /@Overwrite\s+public\s+(?:static\s+)?(?<ret>\w+)\s+(?<name>\w+)\((?<params>[^)]*)\)\s*\{[^}]*NATIVE\.(?<native>\w+)\((?<args>[^)]*)\);/
-
-        (content =~ methodPattern).each { matcher ->
-            String returnType = matcher.group("ret")
-            String methodName = matcher.group("name")
-            String params = matcher.group("params")
-            String nativeMethodName = matcher.group("native")
-
-            // Create a unique key for the signature to handle duplicates
-            String signatureKey = "$methodName($params)"
-            if (uniqueSignatures.contains(signatureKey)) return
-            uniqueSignatures.add(signatureKey)
-
-            // Parse parameters: e.g., "double value, int count" -> ["double", "int"]
-            def paramTypes = matcher.group("params").split(",").collect {
-                it.trim().split(" ")[0]
+        // Simple version string comparison (split by .)
+        def cmp = { v1, v2 ->
+            def p1 = v1.split(/\./).collect { it as int }; def p2 = v2.split(/\./).collect { it as int }
+            for(int i=0; i<Math.max(p1.size(), p2.size()); i++) {
+                int a = i < p1.size() ? p1[i] : 0; int b = i < p2.size() ? p2[i] : 0
+                if(a != b) return a <=> b
             }
-
-            // Map each type to our hardcoded constant
-            def hardcodedArgs = paramTypes.collect { type ->
-                hardcodedValues.get(type, "0") // Default to "0" if type not found
-            }.join(", ")
-
-            // 3. Generate Strings using hardcoded arguments
-            String javaString = """\n@Benchmark
-public $returnType ${methodName}() {
-    return ${targetClassPath}.${methodName}($hardcodedArgs);
-}"""
-
-            String nativeString = """\n@Benchmark
-public $returnType native_${methodName}() {
-    return NATIVE.$nativeMethodName($hardcodedArgs);
-}"""
-            benchmarkClassWriter.writeLine(javaString)
-            benchmarkClassWriter.writeLine(nativeString)
+            return 0
         }
+        return cmp(current, min) >= 0 && cmp(current, max) <= 0
     }
 
-    benchmarkClassWriter.writeLine("}")
-    benchmarkClassWriter.close()
+    def hardcodedValues = ["byte": "(byte) 2", "short": "5", "int": "10", "long": "100L", "float": "0.25F", "double": "100.5", "boolean": "true", "Fraction": "Fraction.getFraction(3, 4)"]
 
-     */
+    def benchmarkClass = file("testMod/src/main/java/com/github/tatercertified/oxidizium_tester/test/Benchmarks.java")
+    benchmarkClass.parentFile.mkdirs()
+    benchmarkClass.text = "package com.github.tatercertified.oxidizium_tester.test;\nimport org.openjdk.jmh.annotations.*;\nimport java.util.concurrent.TimeUnit;\nimport org.apache.commons.lang3.math.Fraction;\nimport net.minecraft.util.Mth;\nimport static com.github.tatercertified.oxidizium.Oxidizium.NATIVE;\n@Warmup(iterations = 1, time = 1, timeUnit = TimeUnit.SECONDS)\n@Measurement(iterations = 1, time = 1, timeUnit = TimeUnit.SECONDS)\n@BenchmarkMode(Mode.AverageTime)\n@OutputTimeUnit(TimeUnit.MICROSECONDS)\npublic class Benchmarks {\n"
+
+    def mixinDir = file("oxidizium/src/main/java/com/github/tatercertified/oxidizium/mixin")
+
+    def methodCounts = [:]
+
+    mixinDir.eachFileRecurse { file ->
+        if (file.directory) return
+        String content = file.text
+        def mixinMatcher = content =~ /@Mixin\(([^.]+)\.class\)/
+        if (!mixinMatcher.find()) return
+        String targetClassPath = mixinMatcher.group(1)
+
+        def methodPattern = /@(?:Overwrite|WrapMethod)\b[\s\S]*?public\s+(?:static\s+)?(\w+)\s+(\w+)\(([^)]*)\)\s*\{[\s\S]*?NATIVE\.(\w+)\(([^)]*)\);/
+
+        (content =~ methodPattern).each { match ->
+            int index = content.indexOf(match[0])
+            String context = content.substring(Math.max(0, index - 300), index)
+            if (context.contains("@IfMinecraftVersion") && !checkVersion(context)) return
+
+            String returnType = match[1]
+            String baseMethodName = match[2]
+            String params = match[3]
+            String nativeMethodName = match[4]
+
+            println "Attempting to generate: ${baseMethodName}"
+
+            def paramTypes = params.split(",").collect { String param ->
+                param.trim().replaceAll(/^@[A-Za-z]+\s+/, "").split(/\s+/)[0]
+            }
+
+            def hardcodedArgsList = paramTypes.collect { type -> hardcodedValues.get(type, "0") }
+            String javaArgs = hardcodedArgsList.join(", ")
+
+            String nativeArgs = javaArgs
+
+            // TODO Handle special cases more gracefully
+            if (baseMethodName == "mulAndTruncate") {
+                nativeMethodName = "multiply_fraction"
+                nativeArgs = "Fraction.getFraction(3, 4).getNumerator(), Fraction.getFraction(3, 4).getDenominator(), 10"
+            }
+
+            methodCounts[baseMethodName] = methodCounts.getOrDefault(baseMethodName, 0) + 1
+            String suffix = methodCounts[baseMethodName] > 1 ? "_${methodCounts[baseMethodName] - 1}" : ""
+            String methodName = "${baseMethodName}${suffix}"
+
+            benchmarkClass.append("""
+@Benchmark
+public $returnType ${methodName}() {
+    return ${targetClassPath}.${baseMethodName}($javaArgs);
+}
+@Benchmark
+public $returnType native_${methodName}() {
+    return NATIVE.$nativeMethodName($nativeArgs);
+}
+""")
+        }
+    }
+    benchmarkClass.append("}")
 }
 
 
@@ -650,6 +591,7 @@ tasks.named('moveBinaries').orNull.dependsOn('modifyGeneratedJava')
 tasks.named('hashLib').orNull.dependsOn('moveBinaries')
 project(':testMod').tasks.named('build').configure {
     dependsOn tasks.named('hashLib')
+    dependsOn rootProject.tasks.named('generateBenchmarks')
 }
 
 project(":oxidizium") {

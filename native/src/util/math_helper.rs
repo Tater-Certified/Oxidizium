@@ -619,7 +619,8 @@ pub extern "C" fn inverse_sqrt_double(#[positive_only] x: f64) -> f64 {
 
 /// Approximation of 1 / sqrt(x)
 #[no_mangle]
-pub extern "C" fn fast_inverse_sqrt(mut x: f64) -> f64 {
+#[validate_params]
+pub extern "C" fn fast_inverse_sqrt(#[positive_only] mut x: f64) -> f64 {
     let d: f64 = 0.5_f64 * x;
     let mut l: u64 = x.to_bits();
     l = INVERSE_SQRT - (l >> 1);
@@ -630,7 +631,8 @@ pub extern "C" fn fast_inverse_sqrt(mut x: f64) -> f64 {
 
 /// Approximation of 1 / sqrt(x)
 #[no_mangle]
-pub extern "C" fn fast_inverse_sqrt_float(mut x: f32) -> f32 {
+#[validate_params]
+pub extern "C" fn fast_inverse_sqrt_float(#[positive_only] mut x: f32) -> f32 {
     let d: f32 = 0.5_f32 * x;
     let mut l: u32 = x.to_bits();
     l = INVERSE_SQRT_F32 - (l >> 1);
@@ -641,7 +643,8 @@ pub extern "C" fn fast_inverse_sqrt_float(mut x: f32) -> f32 {
 
 /// Approximation of 1 / cbrt(x)
 #[no_mangle]
-pub extern "C" fn fast_inverse_cbrt(x: f32) -> f32 {
+#[validate_params]
+pub extern "C" fn fast_inverse_cbrt(#[nonzero] x: f32) -> f32 {
     let mut i: i32 = x.to_bits() as i32;
     i = 1419967116 - i / 3;
     let mut f: f32 = f32::from_bits(i.try_into().unwrap());

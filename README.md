@@ -13,7 +13,8 @@ Many more classes are planned in the future, however mostly low-level classes wi
 ---
 
 ## Compatibility
-As of now, Oxidizium is very compatible with the majority of mods, with specific compatibility with Lithium
+As of now, Oxidizium is very compatible with the majority of mods, with specific compatibility with Lithium.
+Feel free to PR any of your own Rust native code!
 
 ---
 
@@ -25,11 +26,9 @@ Each backend is slightly different, so read about them below:
 Project Panama is a Java 22+ feature that allows for low latency native code execution. This works on any Minecraft version
 from 1.14.3 to modern MC. 
 #### Usage
-**<u>It requires Java 22 or above</u>**.<p>
-The following JVM arguments are recommended, but not *currently* required for Java 24 and below:
-```markdown
---enable-preview --enable-native-access=ALL-UNNAMED
-```
+**You must install Java 22 or above to use Project Panama!**
+The following JVM arguments are recommended, but not *currently* required for Java 25 and below:
+`--enable-preview --enable-native-access=ALL-UNNAMED`
 Using a newer Java version is likely to improve performance more than Java 22. I recommend using [GraalVM](https://www.graalvm.org/downloads/) for the
 best performance, however be warned that it is possible (though very unlikely) that GraalVM could break mods. Use a
 distribution such as [Temurin](https://adoptium.net/) if you want to be completely safe.
@@ -45,7 +44,7 @@ without any runtime overhead — the barrier bytes are dead code (placed after `
 The following JVM arguments are **required** to run Nalim: `-XX:+UnlockExperimentalVMOptions -XX:+EnableJVMCI`
 
 ### Membrane
-Membrane works similar to Nalim, though may achieve slightly lower latency than Nalim (benchmarks soon).
+Membrane works similar to Nalim, though may not be as affective as Nalim (benchmarks soon). It is an **experimental** backend and is not recommended to be used in production.
 Like Nalim, it used to require Java 20 and below, but thanks to an included [patched Membrane jar by QPCrummer](https://github.com/QPCrummer/MembraneFFI),
 it works great in all Minecraft versions using Java 21 and 25!
 #### Usage

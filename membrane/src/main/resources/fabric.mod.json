@@ -5,7 +5,7 @@
     "name": "${mod}",
     "description": "Implementing Minecraft In Rust",
     "authors": [
-        
+        "QPCrummer"
     ],
     "contact": {
         
@@ -15,7 +15,7 @@
     "environment": "*",
     "depends": {
         "fabricloader": "*",
-        "minecraft": ">=1.14.3",
+        "minecraft": ">=26.1",
         "java": "${java_ver}"
     }
 }

@@ -15,9 +15,12 @@ public class BenchmarkManager {
     private static final Map<String, BenchmarkResult> RESULTS = new HashMap<>();
 
     public static void runBenchmarks() {
+        String classpath = System.getProperty("java.class.path");
+
         Collection<RunResult> baselineResults = run(new OptionsBuilder()
                 .include(BaseLineBenchmark.class.getSimpleName())
                 .forks(1)
+                .jvmArgs("-cp", classpath)
                 .build());
 
         double baselineAvg = getPrimaryResult(baselineResults);
@@ -25,6 +28,7 @@ public class BenchmarkManager {
         Collection<RunResult> benchmarkResults = run(new OptionsBuilder()
                 .include(Benchmarks.class.getSimpleName())
                 .forks(1)
+                .jvmArgs("-cp", classpath)
                 .build());
 
         for (RunResult runResult : benchmarkResults) {

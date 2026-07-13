@@ -209,14 +209,15 @@ public class NativeTest {
         Integer maxIndex = null;
 
         for (int i = 0; i < parameters.length; i++) {
-            if (parameters[i].isAnnotationPresent(NonZero.class) &&
-                    ((Number) args[i]).intValue() == 0
-            ) {
-                args[i] = ((Number) args[i]).intValue() + 1;
+            Class<?> type = parameters[i].getType();
+            Number val = (Number) args[i];
+
+            if (parameters[i].isAnnotationPresent(NonZero.class) && val.doubleValue() == 0.0) {
+                args[i] = castToType(val.doubleValue() + 1.0, type);
             }
 
             if (parameters[i].isAnnotationPresent(PositiveOnly.class)) {
-                args[i] = Math.abs(((Number) args[i]).intValue());
+                args[i] = castToType(Math.abs(val.doubleValue()), type);
             }
 
             if (parameters[i].isAnnotationPresent(Min.class)) {
@@ -248,6 +249,15 @@ public class NativeTest {
         }
     }
 
+    private static Object castToType(double value, Class<?> type) {
+        if (type == byte.class || type == Byte.class) return (byte) value;
+        if (type == short.class || type == Short.class) return (short) value;
+        if (type == int.class || type == Integer.class) return (int) value;
+        if (type == long.class || type == Long.class) return (long) value;
+        if (type == float.class || type == Float.class) return (float) value;
+        return value;
+    }
+
     private static Number getCorrectValue(Class<?> type) {
         return switch (type.getName()) {
             case "float" -> ThreadLocalRandom.current().nextFloat((float) (-Math.PI * 4.0F), (float) (Math.PI * 4.0F));
@@ -257,18 +267,6 @@ public class NativeTest {
             case "byte" -> (byte) ThreadLocalRandom.current().nextInt(-128, 127);
             case "org.apache.commons.lang3.math.Fraction" -> Fraction.getFraction(ThreadLocalRandom.current().nextInt(-100, 100), ThreadLocalRandom.current().nextInt(1, 100));
             default -> throw new IllegalArgumentException("Unsupported type: " + type.getName());
-        };
-    }
-
-    private static Number getCorrectValueBounded(Class<?> type, double lower, double upper) {
-        return switch (type.getName()) {
-            case "float" -> ThreadLocalRandom.current().nextFloat((float) lower, (float) upper);
-            case "int" -> ThreadLocalRandom.current().nextInt((int) lower, (int) upper);
-            case "double" -> ThreadLocalRandom.current().nextDouble(lower, upper);
-            case "long" -> ThreadLocalRandom.current().nextLong((long) lower, (long) upper);
-            case "byte" -> (byte) ThreadLocalRandom.current().nextInt((int) lower, (int) upper);
-            case "org.apache.commons.lang3.math.Fraction" -> Fraction.getFraction(ThreadLocalRandom.current().nextDouble(lower, upper));
-            default -> throw new IllegalArgumentException("Unsupported type: " + type);
         };
     }
 
