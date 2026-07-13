@@ -29,17 +29,19 @@ public class BenchmarkResult implements Comparable<BenchmarkResult> {
      * @return "times" faster/slower
      */
     public double speedImprovement() {
-        double output = (this.javaAvgExecTimeUs / this.nativeAvgExecTimeUs) - 1;
-        return output < 0 ? 1 / output : output;
-    }
+        if (this.nativeAvgExecTimeUs <= 0 || this.javaAvgExecTimeUs <= 0) {
+            return 0.0;
+        }
 
-    /**
-     * Gets how much faster the native implementation is.
-     * If it is negative, the java implementation is faster
-     * @return Difference in microsecond execution time between Java and native
-     */
-    public double getUsDifference() {
-        return this.javaAvgExecTimeUs - this.nativeAvgExecTimeUs;
+        if (this.nativeAvgExecTimeUs < this.javaAvgExecTimeUs) {
+            // Native is faster
+            return this.javaAvgExecTimeUs / this.nativeAvgExecTimeUs;
+        } else if (this.nativeAvgExecTimeUs > this.javaAvgExecTimeUs) {
+            // Java is faster (make negative)
+            return -(this.nativeAvgExecTimeUs / this.javaAvgExecTimeUs);
+        }
+
+        return 1.0;
     }
 
     @Override

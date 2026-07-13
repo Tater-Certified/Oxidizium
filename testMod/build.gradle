@@ -18,6 +18,7 @@ dependencies {
     // To change the versions see the gradle.properties file
     compileOnly project(":oxidizium")
     include(implementation 'org.openjdk.jmh:jmh-core:1.37')
+    include(implementation 'org.apache.commons:commons-math3:3.6.1')
     include(annotationProcessor 'org.openjdk.jmh:jmh-generator-annprocess:1.37')
     include(implementation 'io.github.spair:imgui-java-app:1.89.0')
     include(implementation 'io.github.spair:imgui-java-lwjgl3:1.89.0')

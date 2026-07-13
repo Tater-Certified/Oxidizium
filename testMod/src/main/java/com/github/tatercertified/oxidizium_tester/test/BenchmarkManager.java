@@ -6,54 +6,145 @@ import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 
+import java.io.OutputStream;
+import java.io.PrintStream;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class BenchmarkManager {
     private static final Map<String, BenchmarkResult> RESULTS = new HashMap<>();
+    private static final Pattern PROGRESS_PATTERN = Pattern.compile("# Run progress:\\s*([0-9.]+)%\\s*complete");
+    private static final Pattern BENCHMARK_NAME_PATTERN = Pattern.compile("# Benchmark:.*\\.Benchmarks\\.(.+)");
 
     public static void runBenchmarks() {
-        String classpath = System.getProperty("java.class.path");
+        // Set up async progress listener
+        BlockingQueue<String> logQueue = new LinkedBlockingQueue<>();
+        Thread progressThread = new Thread(() -> {
+            try {
+                TestingGUI.resetProgressBar();
+                while (true) {
+                    String line = logQueue.take();
 
-        Collection<RunResult> baselineResults = run(new OptionsBuilder()
-                .include(BaseLineBenchmark.class.getSimpleName())
-                .forks(1)
-                .jvmArgs("-cp", classpath)
-                .build());
+                    Matcher progressMatcher = PROGRESS_PATTERN.matcher(line);
+                    if (progressMatcher.find()) {
+                        String percent = progressMatcher.group(1);
+                        percent = percent.split("\\.")[0];
+                        TestingGUI.setProgressBar(Integer.parseInt(percent));
+                        TestingGUI.setCurrentTestNameFast("Benchmarking " + percent + " Percent");
+                    }
 
-        double baselineAvg = getPrimaryResult(baselineResults);
-
-        Collection<RunResult> benchmarkResults = run(new OptionsBuilder()
-                .include(Benchmarks.class.getSimpleName())
-                .forks(1)
-                .jvmArgs("-cp", classpath)
-                .build());
-
-        for (RunResult runResult : benchmarkResults) {
-            String name = runResult.getParams().getBenchmark();
-            double currentAvg = runResult.getPrimaryResult().getScore();
-
-            if (name.startsWith("native_")) {
-                name = name.replaceFirst("native_", "");
-
-                if (RESULTS.containsKey(name)) {
-                    RESULTS.get(name).setNativeAvgExecTimeUs(baselineAvg - currentAvg);
-                } else {
-                    BenchmarkResult result = new BenchmarkResult();
-                    result.setMethodName(name);
-                    result.setNativeAvgExecTimeUs(baselineAvg - currentAvg);
-                    RESULTS.put(name, result);
+                    Matcher nameMatcher = BENCHMARK_NAME_PATTERN.matcher(line);
+                    if (nameMatcher.find()) {
+                        TestingGUI.setCurrentMethodFast(nameMatcher.group(1));
+                    }
                 }
-            } else {
-                if (RESULTS.containsKey(name)) {
-                    RESULTS.get(name).setJavaAvgExecTimeUs(baselineAvg - currentAvg);
+            } catch (InterruptedException e) {
+                TestingGUI.setProgressBar(100);
+                Thread.currentThread().interrupt();
+            }
+        }, "BenchmarkProgressListener");
+        progressThread.setDaemon(true);
+        progressThread.start();
+
+        // Redirect stdout to capture JMH output
+        PrintStream originalOut = System.out;
+        System.setOut(new ProgressCapturingPrintStream(originalOut, logQueue));
+
+        try {
+            Collection<RunResult> baselineResults = run(new OptionsBuilder()
+                    .include(BaseLineBenchmark.class.getName() + ".*")
+                    .forks(0)
+                    .build());
+
+            double baselineAvg = getPrimaryResult(baselineResults);
+
+            Collection<RunResult> benchmarkResults = run(new OptionsBuilder()
+                    .include(Benchmarks.class.getName() + ".*")
+                    .forks(0)
+                    .build());
+
+            for (RunResult runResult : benchmarkResults) {
+                String name = runResult.getParams().getBenchmark();
+                double currentAvg = runResult.getPrimaryResult().getScore();
+                name = name.substring(name.lastIndexOf(".") + 1);
+
+                if (name.startsWith("native_")) {
+                    name = name.replaceFirst("native_", "");
+
+                    if (RESULTS.containsKey(name)) {
+                        RESULTS.get(name).setNativeAvgExecTimeUs(currentAvg - baselineAvg);
+                    } else {
+                        BenchmarkResult result = new BenchmarkResult();
+                        result.setMethodName(name);
+                        result.setNativeAvgExecTimeUs(currentAvg - baselineAvg);
+                        RESULTS.put(name, result);
+                    }
                 } else {
-                    BenchmarkResult result = new BenchmarkResult();
-                    result.setMethodName(name);
-                    result.setJavaAvgExecTimeUs(baselineAvg - currentAvg);
-                    RESULTS.put(name, result);
+                    if (RESULTS.containsKey(name)) {
+                        RESULTS.get(name).setJavaAvgExecTimeUs(currentAvg - baselineAvg);
+                    } else {
+                        BenchmarkResult result = new BenchmarkResult();
+                        result.setMethodName(name);
+                        result.setJavaAvgExecTimeUs(currentAvg - baselineAvg);
+                        RESULTS.put(name, result);
+                    }
+                }
+            }
+        } finally {
+            System.setOut(originalOut);
+        }
+    }
+
+    /**
+     * A PrintStream that forwards output to another stream while also
+     * pushing complete lines to a queue for async parsing.
+     */
+    private static class ProgressCapturingPrintStream extends PrintStream {
+        private final BlockingQueue<String> queue;
+        private final StringBuilder buffer = new StringBuilder();
+
+        ProgressCapturingPrintStream(OutputStream out, BlockingQueue<String> queue) {
+            super(out, true);
+            this.queue = queue;
+        }
+
+        @Override
+        public void write(int b) {
+            super.write(b);
+            char c = (char) b;
+            buffer.append(c);
+            if (c == '\n') {
+                String line = buffer.substring(0, buffer.length() - 1);
+                buffer.setLength(0);
+                try {
+                    queue.put(line);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+            }
+        }
+
+        @Override
+        public void write(byte[] b, int off, int len) {
+            super.write(b, off, len);
+            for (int i = off; i < off + len; i++) {
+                char c = (char) b[i];
+                buffer.append(c);
+                if (c == '\n') {
+                    String line = buffer.substring(0, buffer.length() - 1);
+                    buffer.setLength(0);
+                    try {
+                        queue.put(line);
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                        break;
+                    }
                 }
             }
         }
@@ -68,6 +159,9 @@ public class BenchmarkManager {
     }
 
     private static double getPrimaryResult(Collection<RunResult> results) {
+        if (results.isEmpty()) {
+            throw new IllegalStateException("Benchmark returned no results. Check that @Benchmark methods exist and JMH generated the benchmark infrastructure (run a clean build after changing benchmark classes).");
+        }
         return results.iterator().next().getPrimaryResult().getScore();
     }
 

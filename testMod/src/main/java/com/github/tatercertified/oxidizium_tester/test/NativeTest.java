@@ -63,6 +63,7 @@ public class NativeTest {
     public static void runBenchmarks() {
         TestingGUI.setCurrentTestName("Benchmarking...");
         OxidiziumTester.TEST_LOGGER.info("Benchmarking...");
+        TestingGUI.setCurrentClass("Benchmarks");
         BenchmarkManager.runBenchmarks();
         OxidiziumTester.TEST_LOGGER.info("Benchmark complete");
         TestingGUI.setCurrentTestName("Benchmarking Complete");

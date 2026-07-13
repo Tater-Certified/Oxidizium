@@ -32,8 +32,25 @@ public class TestingGUI extends Application {
         SAFETY_LOCK.release();
     }
 
+    public static void setCurrentTestNameFast(String name) {
+        currentTest = name;
+    }
+
     public static void setCurrentClass(String className) {
         currentClass = className + ".class";
+    }
+
+    public static void setCurrentMethodFast(String method) {
+        currentMethod = method;
+    }
+
+    public static void resetProgressBar() {
+        CURRENT_TEST_INDEX.set(0);
+        TOTAL_TESTS.set(100);
+    }
+
+    public static void setProgressBar(int i) {
+        CURRENT_TEST_INDEX.set(i);
     }
 
     public static void setCurrentMethod(String methodAndParams) {
