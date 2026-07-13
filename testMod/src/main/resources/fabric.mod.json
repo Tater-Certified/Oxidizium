@@ -18,6 +18,9 @@
     ],
     "main": [
       "com.github.tatercertified.oxidizium_tester.OxidiziumTester"
+    ],
+    "mixinsquared": [
+      "com.github.tatercertified.oxidizium_tester.OxidiziumTestMixinCanceller"
     ]
   },
 

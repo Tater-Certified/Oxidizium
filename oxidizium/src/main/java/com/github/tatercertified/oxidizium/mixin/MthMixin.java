@@ -12,7 +12,6 @@ import org.spongepowered.asm.mixin.Overwrite;
 
 import static com.github.tatercertified.oxidizium.Oxidizium.NATIVE;
 
-@IfBoolean(booleanPath = "com.github.tatercertified.oxidizium.Config", booleanMethodName = "isTestingEnabled", negate = true)
 @Mixin(Mth.class)
 public class MthMixin {
     /**
@@ -912,22 +911,22 @@ public class MthMixin {
      * @reason Implement in Rust
      */
     // @Config(name = "round up")
-    @IfMinecraftVersion(minVersion = "1.16")
-    @Overwrite
-    public static int roundToward(int value, @NonZero int divisor) {
-        return NATIVE.round_towards_int(value, divisor);
-    }
+//    @IfMinecraftVersion(minVersion = "1.16")
+//    @Overwrite
+//    public static int roundToward(int value, @NonZero int divisor) {
+//        return NATIVE.round_towards_int(value, divisor);
+//    }
 
     /**
      * @author QPCrummer
      * @reason Implement in Rust
      */
     // @Config(name = "ceilDiv")
-    @IfMinecraftVersion(minVersion = "1.18")
-    @Overwrite
-    public static int positiveCeilDiv(int a, @NonZero int b) {
-        return NATIVE.positive_ceil_div_int(a, b);
-    }
+//    @IfMinecraftVersion(minVersion = "1.18")
+//    @Overwrite
+//    public static int positiveCeilDiv(int a, @NonZero int b) {
+//        return NATIVE.positive_ceil_div_int(a, b);
+//    }
 
     /**
      * @author QPCrummer

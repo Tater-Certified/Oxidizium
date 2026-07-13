@@ -26,6 +26,7 @@ dependencies {
     include(implementation 'io.github.spair:imgui-java-natives-windows:1.89.0')
     include(implementation 'io.github.spair:imgui-java-natives-linux:1.89.0')
     include(implementation 'io.github.spair:imgui-java-natives-macos:1.89.0')
+    include(implementation(annotationProcessor("com.github.bawnorton.mixinsquared:mixinsquared-fabric:0.3.7-beta.3")))
 }
 
 processResources {

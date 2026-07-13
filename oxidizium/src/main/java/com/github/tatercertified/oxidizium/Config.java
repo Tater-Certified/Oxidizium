@@ -13,7 +13,7 @@ import java.nio.file.StandardOpenOption;
 import java.util.Objects;
 import java.util.Properties;
 
-public record Config(String version, boolean debug, boolean test, boolean reducedMemoryUsage, boolean enhancedLithiumSupport) {
+public record Config(String version, boolean debug, boolean reducedMemoryUsage, boolean enhancedLithiumSupport) {
     private static Config instance;
     private static final Path CONFIG_PATH = FabricLoader.getInstance().getConfigDir().resolve("oxidizium.properties");
     public static void init() {
@@ -80,10 +80,9 @@ public record Config(String version, boolean debug, boolean test, boolean reduce
     private static void parse(String configVer, Properties properties) {
         fillDefaults(configVer, properties);
         boolean debug = Boolean.parseBoolean(properties.getProperty("debug"));
-        boolean testingMode = Boolean.parseBoolean(properties.getProperty("test-mode"));
         boolean reducedMemUse = Boolean.parseBoolean(properties.getProperty("reduced-memory-usage"));
         boolean enhancedLithiumCompat = Boolean.parseBoolean(properties.getProperty("enhanced-lithium-compat"));
-        instance = new Config(configVer, debug, testingMode, reducedMemUse, enhancedLithiumCompat);
+        instance = new Config(configVer, debug, reducedMemUse, enhancedLithiumCompat);
     }
 
     public static Config getInstance() {
@@ -92,10 +91,6 @@ public record Config(String version, boolean debug, boolean test, boolean reduce
 
     public static boolean isLithiumOptimizationEnabled() {
         return instance.enhancedLithiumSupport() && FabricLoaderImpl.InitHelper.get().isModLoaded("lithium");
-    }
-
-    public static boolean isTestingEnabled() {
-        return instance.test();
     }
 
     public static boolean isNalim() {

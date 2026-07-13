@@ -982,27 +982,27 @@ pub extern "C" fn is_power_of_2(value: i64) -> bool {
 /// Rounds towards the nearest multiple
 #[no_mangle]
 #[validate_params]
-pub extern "C" fn round_towards_long(input: i64, #[nonzero] multiple: i64) -> i64 {
+pub extern "C" fn round_towards_long(#[positive_only] input: i64, #[nonzero] multiple: i64) -> i64 {
     positive_ceil_div_long(input, multiple) * multiple
 }
 
 /// Rounds towards the nearest multiple
 #[no_mangle]
 #[validate_params]
-pub extern "C" fn round_towards_int(input: i32, #[nonzero] multiple: i32) -> i32 {
+pub extern "C" fn round_towards_int(#[positive_only] input: i32, #[nonzero] multiple: i32) -> i32 {
     positive_ceil_div_int(input, multiple) * multiple
 }
 
 /// Ceil divide, but always positive
 #[no_mangle]
 #[validate_params]
-pub extern "C" fn positive_ceil_div_long(input: i64, #[nonzero] divisor: i64) -> i64 {
+pub extern "C" fn positive_ceil_div_long(#[positive_only] input: i64, #[nonzero] divisor: i64) -> i64 {
     (input + divisor - 1) / divisor
 }
 
 /// Ceil divide, but always positive
 #[no_mangle]
 #[validate_params]
-pub extern "C" fn positive_ceil_div_int(input: i32, #[nonzero] divisor: i32) -> i32 {
+pub extern "C" fn positive_ceil_div_int(#[positive_only] input: i32, #[nonzero] divisor: i32) -> i32 {
     (input + divisor - 1) / divisor
 }

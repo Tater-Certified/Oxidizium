@@ -41,7 +41,7 @@ public class OxidiziumMixinPlugin implements IMixinConfigPlugin {
 
     @Override
     public List<String> getMixins() {
-        return Config.getInstance().test() ? List.of() : null;
+        return null;
     }
 
     @Override
