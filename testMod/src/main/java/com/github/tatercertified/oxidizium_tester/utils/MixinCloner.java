@@ -14,6 +14,13 @@ import java.io.InputStream;
 import static org.objectweb.asm.Opcodes.*;
 
 public final class MixinCloner {
+    /**
+     * Duplicates a Mixin Class to avoid runtime Mixin errors
+     * @param originalInternalName Original Mixin Classpath
+     * @param newInternalName New Mixin Classpath
+     * @return A new cloned Class
+     * @throws IOException If something goes catastrophically wrong...
+     */
     public static Class<?> cloneStaticMethods(String originalInternalName, String newInternalName) throws IOException {
         ClassReader reader = new ClassReader(streamClass(originalInternalName));
         ClassWriter writer = new ClassWriter(ClassWriter.COMPUTE_FRAMES | ClassWriter.COMPUTE_MAXS);
@@ -37,12 +44,15 @@ public final class MixinCloner {
 
         byte[] newClassBytes = writer.toByteArray();
 
+        String dotName = newInternalName.replace('/', '.');
+        BytecodeAnalyzer.ClassBytecodeRegistry.CLONED_CLASSES.put(dotName, newClassBytes);
+
         return new ClassLoader(MixinCloner.class.getClassLoader()) {
             public Class<?> define() {
                 if (Config.getInstance().debug()) {
                     OxidiziumTester.TEST_LOGGER.info("Cloned {} to {}", originalInternalName, newInternalName);
                 }
-                return defineClass(newInternalName.replace('/', '.'), newClassBytes, 0, newClassBytes.length);
+                return defineClass(dotName, newClassBytes, 0, newClassBytes.length);
             }
         }.define();
     }
