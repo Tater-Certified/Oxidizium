@@ -75,6 +75,9 @@ public class BytecodeAnalyzer {
     private static Class<?> getClassFromType(Type type) throws ClassNotFoundException {
         return switch (type.getSort()) {
             case Type.BOOLEAN -> boolean.class;
+            case Type.BYTE -> byte.class;
+            case Type.CHAR -> char.class;
+            case Type.SHORT -> short.class;
             case Type.INT -> int.class;
             case Type.DOUBLE -> double.class;
             case Type.FLOAT -> float.class;

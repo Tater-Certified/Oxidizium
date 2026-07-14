@@ -69,35 +69,53 @@ public class ParityManager {
     }
 
     private static void runTest(Method nativeMethod, Method javaMethod, boolean requiresOperationObject) {
-        OxidiziumTester.TEST_LOGGER.info("Testing {}.{}", javaMethod.getDeclaringClass().getName(), javaMethod.getName());
-        TestingGUI.setCurrentMethod(javaMethod.getName());
-        Object[] testValues = selectTestValues(javaMethod.getParameterTypes(), getAllParameterAnnotations(nativeMethod));
-        Object javaOutput;
-        try {
-            javaOutput = javaMethod.invoke(null, testValues);
-        } catch (IllegalAccessException | InvocationTargetException e) {
-            throw new RuntimeException(e);
-        }
-        if (requiresOperationObject) {
-            Object[] extendedValues = Arrays.copyOf(testValues, testValues.length + 1);
-            extendedValues[extendedValues.length - 1] = OPERATION;
-            testValues = extendedValues;
-        }
-        Object nativeOutput;
-        try {
-            nativeOutput = nativeMethod.invoke(null, testValues);
-        } catch (IllegalAccessException | InvocationTargetException e) {
-            throw new RuntimeException(e);
-        }
+        Annotation[][] allParamAnnotations = getAllParameterAnnotations(nativeMethod);
+        for (int run = 0; run < NativeTest.getRunsPerTest().get(); run++) {
+            Object[] testValues = selectTestValues(javaMethod.getParameterTypes(), allParamAnnotations);
+            Object javaOutput;
+            try {
+                javaOutput = javaMethod.invoke(null, testValues);
+            } catch (IllegalAccessException | InvocationTargetException e) {
+                throw new RuntimeException(e);
+            }
+            if (requiresOperationObject) {
+                Object[] extendedValues = Arrays.copyOf(testValues, testValues.length + 1);
+                extendedValues[extendedValues.length - 1] = OPERATION;
+                testValues = extendedValues;
+            }
+            Object nativeOutput;
+            try {
+                nativeOutput = nativeMethod.invoke(null, testValues);
+            } catch (IllegalAccessException | InvocationTargetException e) {
+                throw new RuntimeException(e);
+            }
 
-        withinReason((Number) javaOutput, (Number) nativeOutput, javaMethod.getName());
+            if (!withinReason(javaOutput, nativeOutput, javaMethod.getName())) {
+                break;
+            }
+        }
     }
 
-    private static void withinReason(Number javaOutput, Number nativeOutput, String methodname) {
-        if (javaOutput.doubleValue() == nativeOutput.doubleValue()) {
-            OxidiziumTester.TEST_LOGGER.info("[Native] {} | [Java] {}", nativeOutput, javaOutput);
+    private static boolean withinReason(Object javaOutput, Object nativeOutput, String methodname) {
+        if (javaOutput instanceof Number javaNum && nativeOutput instanceof Number nativeNum) {
+            if (javaNum.doubleValue() == nativeNum.doubleValue()) {
+                OxidiziumTester.TEST_LOGGER.info("[Native] {} | [Java] {}", nativeNum, javaNum);
+                return true;
+            } else {
+                boolean withinTolerance = Math.abs(javaNum.doubleValue() - nativeNum.doubleValue()) < TOLERANCE;
+                OxidiziumTester.TEST_LOGGER.warn("[Native] {} != [Java] {}", nativeOutput, javaOutput);
+                TestingGUI.addError(methodname, withinTolerance, "[Native] " + nativeNum + " != [Java] " + javaNum);
+                return withinTolerance;
+            }
         } else {
-            TestingGUI.addError(methodname, Math.abs(javaOutput.doubleValue() - nativeOutput.doubleValue()) < TOLERANCE, "[Native] " + nativeOutput + " != [Java] " + javaOutput);
+            if (Objects.equals(javaOutput, nativeOutput)) {
+                OxidiziumTester.TEST_LOGGER.info("[Native] {} | [Java] {}", nativeOutput, javaOutput);
+                return true;
+            } else {
+                OxidiziumTester.TEST_LOGGER.warn("[Native] {} != [Java] {}", nativeOutput, javaOutput);
+                TestingGUI.addError(methodname, false, "[Native] " + nativeOutput + " != [Java] " + javaOutput);
+                return false;
+            }
         }
     }
 
@@ -112,6 +130,9 @@ public class ParityManager {
         if (nativeMethod == null) {
             return new Annotation[][]{};
         }
+
+        OxidiziumTester.TEST_LOGGER.info("Testing {}.{}", nativeMethod.getDeclaringClass().getName(), nativeMethod.getName());
+        TestingGUI.setCurrentMethod(nativeMethod.getName());
 
         Parameter[] parameters = nativeMethod.getParameters();
         Annotation[][] allAnnotations = new Annotation[parameters.length][];
@@ -134,11 +155,11 @@ public class ParityManager {
         int maxIndex = 0;
         double[] largestValue = new double[]{Double.MIN_VALUE};
 
-        List<Object> testVals = new ArrayList<>();
+        List<Object> testVals = new ArrayList<>(Collections.nCopies(types.length, null));
 
         outer: for (int i = 0; i < types.length; i++) {
             Class type = types[i];
-            Annotation[] annotations = requirements[i];
+            Annotation[] annotations = i < requirements.length ? requirements[i] : new Annotation[0];
 
             // Check for min and max
             for (Annotation a : annotations) {

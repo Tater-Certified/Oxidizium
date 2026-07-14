@@ -337,6 +337,8 @@ public class TestingGUI extends Application {
     /**
      * Renders benchmark results in the Info panel.
      * Methods where native is slower than Java are highlighted in red.
+     * When either time is at JMH's measurement floor (~10^-3), raw times
+     * are shown instead of a ratio (which would be meaningless from noisy data).
      */
     private static void renderBenchmarkResults(float boxWidth) {
         List<BenchmarkResult> results = BenchmarkManager.getResults();
@@ -372,15 +374,21 @@ public class TestingGUI extends Application {
         // Results (sorted: slower-native first)
         for (BenchmarkResult result : results) {
             String methodLabel = result.getMethodName();
-            double speedImprovement = result.speedImprovement();
-            String ratioText = String.format("%.2fx", Math.abs(speedImprovement));
+            double ratio = result.speedImprovement();
+
+            String ratioText;
+            if (ratio <= 0) {
+                ratioText = "N/A";
+            } else {
+                ratioText = String.format("%.2fx", ratio);
+            }
 
             // Truncate long method names
             if (methodLabel.length() > 25) {
                 methodLabel = methodLabel.substring(0, 22) + "...";
             }
 
-            if (speedImprovement < 0) {
+            if (ratio > 0 && ratio < 1.0) {
                 // RED highlighting for native slower than Java
                 ImGui.textColored(ImColor.rgb(255, 60, 60), methodLabel);
                 ImGui.sameLine();

@@ -15,33 +15,25 @@ public class BenchmarkResult implements Comparable<BenchmarkResult> {
         return this.methodName;
     }
 
-    public void setJavaAvgExecTimeUs(double Us) {
-        this.javaAvgExecTimeUs = Us;
+    public void setJavaAvgExecTimeUs(double us) {
+        this.javaAvgExecTimeUs = us;
     }
 
-    public void setNativeAvgExecTimeUs(double Us) {
-        this.nativeAvgExecTimeUs = Us;
+    public void setNativeAvgExecTimeUs(double us) {
+        this.nativeAvgExecTimeUs = us;
     }
 
     /**
-     * Gives the speed improvement in "times" faster. Ex: 0.75x faster.
-     * Negative values means the native version is slower. Ex: -0.5 = 0.5x slower
-     * @return "times" faster/slower
+     * Ratio of Java time to native time.
+     * @return javaTime / nativeTime. >1.0 means native is faster, <1.0 means native is slower.
+     *         Returns 0.0 if either value is missing (not yet benchmarked).
      */
     public double speedImprovement() {
         if (this.nativeAvgExecTimeUs <= 0 || this.javaAvgExecTimeUs <= 0) {
             return 0.0;
         }
 
-        if (this.nativeAvgExecTimeUs < this.javaAvgExecTimeUs) {
-            // Native is faster
-            return this.javaAvgExecTimeUs / this.nativeAvgExecTimeUs;
-        } else if (this.nativeAvgExecTimeUs > this.javaAvgExecTimeUs) {
-            // Java is faster (make negative)
-            return -(this.nativeAvgExecTimeUs / this.javaAvgExecTimeUs);
-        }
-
-        return 1.0;
+        return this.javaAvgExecTimeUs / this.nativeAvgExecTimeUs;
     }
 
     @Override

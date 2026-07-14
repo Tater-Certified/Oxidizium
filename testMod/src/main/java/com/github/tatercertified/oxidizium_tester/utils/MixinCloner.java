@@ -44,12 +44,15 @@ public final class MixinCloner {
 
         byte[] newClassBytes = writer.toByteArray();
 
+        String dotName = newInternalName.replace('/', '.');
+        BytecodeAnalyzer.ClassBytecodeRegistry.CLONED_CLASSES.put(dotName, newClassBytes);
+
         return new ClassLoader(MixinCloner.class.getClassLoader()) {
             public Class<?> define() {
                 if (Config.getInstance().debug()) {
                     OxidiziumTester.TEST_LOGGER.info("Cloned {} to {}", originalInternalName, newInternalName);
                 }
-                return defineClass(newInternalName.replace('/', '.'), newClassBytes, 0, newClassBytes.length);
+                return defineClass(dotName, newClassBytes, 0, newClassBytes.length);
             }
         }.define();
     }

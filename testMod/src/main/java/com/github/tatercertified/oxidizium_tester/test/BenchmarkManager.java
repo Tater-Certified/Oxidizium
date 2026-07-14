@@ -57,13 +57,6 @@ public class BenchmarkManager {
         System.setOut(new ProgressCapturingPrintStream(originalOut, logQueue));
 
         try {
-            Collection<RunResult> baselineResults = run(new OptionsBuilder()
-                    .include(BaseLineBenchmark.class.getName() + ".*")
-                    .forks(0)
-                    .build());
-
-            double baselineAvg = getPrimaryResult(baselineResults);
-
             Collection<RunResult> benchmarkResults = run(new OptionsBuilder()
                     .include(Benchmarks.class.getName() + ".*")
                     .forks(0)
@@ -74,24 +67,25 @@ public class BenchmarkManager {
                 double currentAvg = runResult.getPrimaryResult().getScore();
                 name = name.substring(name.lastIndexOf(".") + 1);
 
+                // Use raw JMH scores — JMH already accounts for its own overhead.
                 if (name.startsWith("native_")) {
                     name = name.replaceFirst("native_", "");
 
                     if (RESULTS.containsKey(name)) {
-                        RESULTS.get(name).setNativeAvgExecTimeUs(currentAvg - baselineAvg);
+                        RESULTS.get(name).setNativeAvgExecTimeUs(currentAvg);
                     } else {
                         BenchmarkResult result = new BenchmarkResult();
                         result.setMethodName(name);
-                        result.setNativeAvgExecTimeUs(currentAvg - baselineAvg);
+                        result.setNativeAvgExecTimeUs(currentAvg);
                         RESULTS.put(name, result);
                     }
                 } else {
                     if (RESULTS.containsKey(name)) {
-                        RESULTS.get(name).setJavaAvgExecTimeUs(currentAvg - baselineAvg);
+                        RESULTS.get(name).setJavaAvgExecTimeUs(currentAvg);
                     } else {
                         BenchmarkResult result = new BenchmarkResult();
                         result.setMethodName(name);
-                        result.setJavaAvgExecTimeUs(currentAvg - baselineAvg);
+                        result.setJavaAvgExecTimeUs(currentAvg);
                         RESULTS.put(name, result);
                     }
                 }
@@ -158,13 +152,6 @@ public class BenchmarkManager {
         }
     }
 
-    private static double getPrimaryResult(Collection<RunResult> results) {
-        if (results.isEmpty()) {
-            throw new IllegalStateException("Benchmark returned no results. Check that @Benchmark methods exist and JMH generated the benchmark infrastructure (run a clean build after changing benchmark classes).");
-        }
-        return results.iterator().next().getPrimaryResult().getScore();
-    }
-
     /**
      * Gets a sorted list of the results
      * @return Gets a sorted list of the results
@@ -178,6 +165,9 @@ public class BenchmarkManager {
      * @return Number of results slower than Java
      */
     public static long getSlower() {
-        return RESULTS.values().stream().filter(result -> result.speedImprovement() < 0).count();
+        return RESULTS.values().stream().filter(result -> {
+            double ratio = result.speedImprovement();
+            return ratio > 0 && ratio < 1.0;
+        }).count();
     }
 }
