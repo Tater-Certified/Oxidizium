@@ -79,4 +79,8 @@ fn main() {
 
     // Tell cargo to rerun only if build.rs changes (tables are deterministic)
     println!("cargo:rerun-if-changed=build.rs");
+
+    // We love Windows >:(
+    #[cfg(target_os = "windows")]
+    println!("cargo:rustc-link-lib=advapi32");
 }
