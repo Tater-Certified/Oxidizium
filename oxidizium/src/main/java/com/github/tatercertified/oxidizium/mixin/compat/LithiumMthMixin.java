@@ -1,7 +1,7 @@
 package com.github.tatercertified.oxidizium.mixin.compat;
 
-import com.moulberry.mixinconstraints.annotations.IfBoolean;
-import com.moulberry.mixinconstraints.annotations.IfMinecraftVersion;
+import com.github.tatercertified.mixinconstraints.annotations.IfBoolean;
+import com.github.tatercertified.mixinconstraints.annotations.IfMinecraftVersion;
 import net.minecraft.util.Mth;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;

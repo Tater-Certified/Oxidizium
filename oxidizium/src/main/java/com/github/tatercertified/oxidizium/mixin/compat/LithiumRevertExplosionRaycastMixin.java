@@ -1,7 +1,7 @@
 package com.github.tatercertified.oxidizium.mixin.compat;
 
 import com.bawnorton.mixinsquared.TargetHandler;
-import com.moulberry.mixinconstraints.annotations.IfBoolean;
+import com.github.tatercertified.mixinconstraints.annotations.IfBoolean;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
