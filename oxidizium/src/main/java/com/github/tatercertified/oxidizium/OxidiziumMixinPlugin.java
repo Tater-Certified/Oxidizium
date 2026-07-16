@@ -1,8 +1,8 @@
 package com.github.tatercertified.oxidizium;
 
 import com.github.tatercertified.oxidizium.utils.asm.StripProcessor;
-import com.moulberry.mixinconstraints.MixinConstraints;
-import com.moulberry.mixinconstraints.mixin.MixinConstraintsBootstrap;
+import com.github.tatercertified.mixinconstraints.MixinConstraints;
+import com.github.tatercertified.mixinconstraints.mixin.MixinConstraintsBootstrap;
 import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
