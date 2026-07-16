@@ -13,6 +13,5 @@ public class Oxidizium implements ModInitializer {
     public static Backend BACKEND = ServiceLoader.load(Backend.class).iterator().next();
 
     @Override
-    public void onInitialize() {
-    }
+    public void onInitialize() {}
 }

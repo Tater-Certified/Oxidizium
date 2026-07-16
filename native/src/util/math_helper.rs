@@ -1,13 +1,17 @@
-use mimalloc::MiMalloc;
 use oxidizium_macros::validate_params;
 use std::ffi::c_ushort;
 use std::num::Wrapping;
 use std::slice;
 
-#[global_allocator]
-static GLOBAL: MiMalloc = MiMalloc;
 
-const APPROXIMATION_THRESHOLD: f32 = 1.0E-5;
+#[global_allocator]
+#[cfg(all(target_arch = "x86_64", any(target_os = "windows", target_os = "macos", target_os = "linux")))]
+static ALLOC: rpmalloc::RpMalloc = rpmalloc::RpMalloc;
+#[cfg(not(all(target_arch = "x86_64", any(target_os = "windows", target_os = "macos", target_os = "linux"))))]
+static GLOBAL: mimalloc::MiMalloc = mimalloc::MiMalloc;
+
+const APPROXIMATION_THRESHOLD_F32: f32 = f32::from_bits(0x3727C5AC);
+const APPROXIMATION_THRESHOLD_F64: f64 = f64::from_bits(0x3EE4F8B580000000u64);
 const MULTIPLY_DE_BRUIJN_BIT_POS: [i8; 32] = [
     0, 1, 28, 2, 29, 14, 24, 3, 30, 22, 20, 15, 25, 17, 4, 8, 31, 27, 13, 23, 21, 19, 16, 7, 26,
     12, 18, 6, 11, 5, 10, 9,
@@ -236,13 +240,13 @@ pub extern "C" fn floor_div(dividend: i32, #[nonzero] divisor: i32) -> i32 {
 /// If the values are equal excluding floating point errors
 #[no_mangle]
 pub extern "C" fn approximately_equals_float(a: f32, b: f32) -> bool {
-    (b - a).abs() < APPROXIMATION_THRESHOLD
+    (b - a).abs() < APPROXIMATION_THRESHOLD_F32
 }
 
 /// If the values are equal excluding floating point errors
 #[no_mangle]
 pub extern "C" fn approximately_equals_double(a: f64, b: f64) -> bool {
-    (b - a).abs() < APPROXIMATION_THRESHOLD as f64
+    (b - a).abs() < APPROXIMATION_THRESHOLD_F64
 }
 
 /// Floor mod of the dividend and divisor
@@ -982,27 +986,39 @@ pub extern "C" fn is_power_of_2(value: i64) -> bool {
 /// Rounds towards the nearest multiple
 #[no_mangle]
 #[validate_params]
-pub extern "C" fn round_towards_long(#[positive_only] input: i64, #[nonzero] multiple: i64) -> i64 {
+pub extern "C" fn round_towards_long(input: i64, #[nonzero] multiple: i64) -> i64 {
     positive_ceil_div_long(input, multiple) * multiple
 }
 
 /// Rounds towards the nearest multiple
 #[no_mangle]
 #[validate_params]
-pub extern "C" fn round_towards_int(#[positive_only] input: i32, #[nonzero] multiple: i32) -> i32 {
+pub extern "C" fn round_towards_int(input: i32, #[nonzero] multiple: i32) -> i32 {
     positive_ceil_div_int(input, multiple) * multiple
 }
 
 /// Ceil divide, but always positive
 #[no_mangle]
 #[validate_params]
-pub extern "C" fn positive_ceil_div_long(#[positive_only] input: i64, #[nonzero] divisor: i64) -> i64 {
-    (input + divisor - 1) / divisor
+pub extern "C" fn positive_ceil_div_long(input: i64, #[nonzero] divisor: i64) -> i64 {
+    let x = -input;
+    let q = x / divisor;
+    if ((x ^ divisor) < 0) && (q * divisor != x) {
+            -(q - 1)
+    } else {
+        -q
+    }
 }
 
 /// Ceil divide, but always positive
 #[no_mangle]
 #[validate_params]
-pub extern "C" fn positive_ceil_div_int(#[positive_only] input: i32, #[nonzero] divisor: i32) -> i32 {
-    (input + divisor - 1) / divisor
+pub extern "C" fn positive_ceil_div_int(input: i32, #[nonzero] divisor: i32) -> i32 {
+    let x = -input;
+    let q = x / divisor;
+    if ((x ^ divisor) < 0) && (q * divisor != x) {
+            -(q - 1)
+    } else {
+        -q
+    }
 }

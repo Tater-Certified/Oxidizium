@@ -11,8 +11,13 @@ crate-type = ["cdylib"]
 members = ["macros"]
 
 [dependencies]
-mimalloc = {git = "https://github.com/ralfbiedert/mimalloc_rust", features = ["v3"]}
 oxidizium_macros = { path = "macros" }
+
+[target.'cfg(all(target_arch = "x86_64", any(target_os = "windows", target_os = "macos", target_os = "linux")))'.dependencies]
+rpmalloc = "0.2.2"
+
+[target.'cfg(not(all(target_arch = "x86_64", any(target_os = "windows", target_os = "macos", target_os = "linux"))))'.dependencies]
+mimalloc = { git = "https://github.com/ralfbiedert/mimalloc_rust", features = ["v3"] }
 
 [build-dependencies]
 cbindgen = "0.29.4"
