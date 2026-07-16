@@ -4,11 +4,12 @@ use std::num::Wrapping;
 use std::slice;
 
 
-#[global_allocator]
 #[cfg(all(target_arch = "x86_64", any(target_os = "windows", target_os = "macos", target_os = "linux")))]
+#[global_allocator]
 static ALLOC: rpmalloc::RpMalloc = rpmalloc::RpMalloc;
 #[cfg(not(all(target_arch = "x86_64", any(target_os = "windows", target_os = "macos", target_os = "linux"))))]
-static GLOBAL: mimalloc::MiMalloc = mimalloc::MiMalloc;
+#[global_allocator]
+static ALLOC: mimalloc::MiMalloc = mimalloc::MiMalloc;
 
 const APPROXIMATION_THRESHOLD_F32: f32 = f32::from_bits(0x3727C5AC);
 const APPROXIMATION_THRESHOLD_F64: f64 = f64::from_bits(0x3EE4F8B580000000u64);
