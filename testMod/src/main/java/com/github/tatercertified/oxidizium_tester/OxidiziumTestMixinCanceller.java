@@ -10,7 +10,7 @@ public class OxidiziumTestMixinCanceller implements MixinCanceller {
     public boolean shouldCancel(List<String> targetClassNames, String mixinClassName) {
         ParityManager.collectMixins(targetClassNames.getFirst(), mixinClassName);
 
-        if (!mixinClassName.equals("com.github.tatercertified.oxidizium_tester.mixin.WindowMixin")) {
+        if (!mixinClassName.equals("com.github.tatercertified.oxidizium_tester.mixin.WindowMixin") && !mixinClassName.equals("com.github.tatercertified.panama.mixin.LinuxFixMixin") ) {
             OxidiziumTester.TEST_LOGGER.warn("Cancelling {} for testing!", mixinClassName);
             return true;
         }
