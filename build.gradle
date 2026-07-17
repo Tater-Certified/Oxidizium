@@ -25,7 +25,7 @@ subprojects {
         minecraft "com.mojang:minecraft:${project.minecraft_version}"
         implementation "net.fabricmc:fabric-loader:${project.loader_version}"
         include(implementation 'org.joml:joml:1.10.8')
-        include(implementation 'com.github.Tater-Certified:MixinConstraints:958d2ae23f')
+        include(implementation 'com.github.Tater-Certified:MixinConstraints:217bb39900')
         include(implementation "com.github.zafarkhaja:java-semver:0.10.2")
     }
 }
