@@ -28,6 +28,23 @@ public class BenchmarkResult implements Comparable<BenchmarkResult> {
      * @return javaTime / nativeTime. >1.0 means native is faster, <1.0 means native is slower.
      *         Returns 0.0 if either value is missing (not yet benchmarked).
      */
+    public double getJavaAvgExecTimeUs() {
+        return javaAvgExecTimeUs;
+    }
+
+    public double getNativeAvgExecTimeUs() {
+        return nativeAvgExecTimeUs;
+    }
+
+    public boolean hasBothResults() {
+        return this.nativeAvgExecTimeUs > 0 && this.javaAvgExecTimeUs > 0;
+    }
+
+    /**
+     * Ratio of Java time to native time.
+     * @return javaTime / nativeTime. >1.0 means native is faster, <1.0 means native is slower.
+     *         Returns 0.0 if either value is missing (not yet benchmarked).
+     */
     public double speedImprovement() {
         if (this.nativeAvgExecTimeUs <= 0 || this.javaAvgExecTimeUs <= 0) {
             return 0.0;

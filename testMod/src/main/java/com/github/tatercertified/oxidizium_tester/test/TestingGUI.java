@@ -346,21 +346,70 @@ public class TestingGUI extends Application {
         centerText("Benchmark Results", boxWidth, true);
         multiSpace(2);
 
-        // Summary line
+        // --- Summary Statistics ---
+        long completeCount = BenchmarkManager.getCompleteCount();
+        long fasterCount = BenchmarkManager.getFaster();
         long slowerCount = BenchmarkManager.getSlower();
-        String summary = String.format("%d methods | %d native slower", results.size(), slowerCount);
-        if (slowerCount > 0) {
+        double avgSpeedup = BenchmarkManager.getAverageSpeedImprovement();
+        BenchmarkResult best = BenchmarkManager.getBestResult();
+        BenchmarkResult worst = BenchmarkManager.getWorstResult();
+
+        // Overall summary
+        String summary = String.format("%d/%d complete | %d faster, %d slower",
+                completeCount, results.size(), fasterCount, slowerCount);
+        if (slowerCount > completeCount / 2) {
             ImGui.textColored(ImColor.rgb(255, 80, 80), summary);
+        } else if (fasterCount > completeCount / 2) {
+            ImGui.textColored(ImColor.rgb(80, 255, 80), summary);
         } else {
             ImGui.text(summary);
         }
-        multiSpace(2);
+        multiSpace(1);
 
-        // Column headers
-        centerText("Ratio", boxWidth, false);
+        // Average speedup
+        String avgText = String.format("Avg speedup: %.2fx", avgSpeedup);
+        if (avgSpeedup > 1.0) {
+            ImGui.textColored(ImColor.rgb(80, 255, 80), avgText);
+        } else if (avgSpeedup > 0) {
+            ImGui.textColored(ImColor.rgb(255, 80, 80), avgText);
+        } else {
+            ImGui.text(avgText);
+        }
+        multiSpace(1);
+
+        // Best result
+        if (best != null) {
+            String bestName = best.getMethodName();
+            if (bestName.length() > 25) bestName = bestName.substring(0, 22) + "...";
+            String bestText = String.format("Best: %s (%.2fx)", bestName, best.speedImprovement());
+            if (best.speedImprovement() > 1.0) {
+                ImGui.textColored(ImColor.rgb(80, 255, 80), bestText);
+            } else {
+                ImGui.textColored(ImColor.rgb(255, 80, 80), bestText);
+            }
+            multiSpace(1);
+        }
+
+        // Worst result
+        if (worst != null) {
+            String worstName = worst.getMethodName();
+            if (worstName.length() > 25) worstName = worstName.substring(0, 22) + "...";
+            String worstText = String.format("Worst: %s (%.2fx)", worstName, worst.speedImprovement());
+            if (worst.speedImprovement() > 1.0) {
+                ImGui.textColored(ImColor.rgb(80, 255, 80), worstText);
+            } else {
+                ImGui.textColored(ImColor.rgb(255, 80, 80), worstText);
+            }
+            multiSpace(1);
+        }
+
+        multiSpace(1);
+
+        // Column headers (fixed to match actual rendering order)
+        ImGui.text("Method");
         ImGui.sameLine();
         ImGui.setCursorPosX(boxWidth - 60);
-        centerText("Method", 60, false);
+        ImGui.text("Ratio");
         multiSpace(1);
 
         // Separator line

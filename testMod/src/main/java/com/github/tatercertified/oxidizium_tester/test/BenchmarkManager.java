@@ -170,4 +170,56 @@ public class BenchmarkManager {
             return ratio > 0 && ratio < 1.0;
         }).count();
     }
+
+    /**
+     * Gets the number of results that are faster than Java
+     * @return Number of results faster than Java
+     */
+    public static long getFaster() {
+        return RESULTS.values().stream().filter(result -> result.speedImprovement() > 1.0).count();
+    }
+
+    /**
+     * Calculates the average speed improvement across all complete benchmarks.
+     * @return Average of javaTime / nativeTime ratios. >1.0 means native is faster on average.
+     */
+    public static double getAverageSpeedImprovement() {
+        List<BenchmarkResult> complete = RESULTS.values().stream()
+                .filter(BenchmarkResult::hasBothResults)
+                .toList();
+        if (complete.isEmpty()) {
+            return 0.0;
+        }
+        return complete.stream().mapToDouble(BenchmarkResult::speedImprovement).average().orElse(0.0);
+    }
+
+    /**
+     * Gets the benchmark with the best speed improvement (highest ratio).
+     * @return The best result, or null if no complete benchmarks exist.
+     */
+    public static BenchmarkResult getBestResult() {
+        return RESULTS.values().stream()
+                .filter(BenchmarkResult::hasBothResults)
+                .max(BenchmarkResult::compareTo)
+                .orElse(null);
+    }
+
+    /**
+     * Gets the benchmark with the worst speed improvement (lowest ratio).
+     * @return The worst result, or null if no complete benchmarks exist.
+     */
+    public static BenchmarkResult getWorstResult() {
+        return RESULTS.values().stream()
+                .filter(BenchmarkResult::hasBothResults)
+                .min(BenchmarkResult::compareTo)
+                .orElse(null);
+    }
+
+    /**
+     * Gets the number of benchmarks that have both Java and native results.
+     * @return Count of complete benchmarks.
+     */
+    public static long getCompleteCount() {
+        return RESULTS.values().stream().filter(BenchmarkResult::hasBothResults).count();
+    }
 }
