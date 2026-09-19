@@ -39,14 +39,15 @@ Project Panama for leaf (quick) calls and was ~50x faster vs pre-FFM Panama on J
 
 Nalim historically broke on Java 21+ because Loom [JEP 444](https://openjdk.org/jeps/444) made the JVMCI nmethod entry barrier mandatory for every GC.
 Oxidizium ships a [Nalim jar patched by FurryMileon](https://github.com/FurryMileon/nalim) that emits a "no-op" barrier sequence after the tail-call so JVMCI validation passes
-without any runtime overhead — the barrier bytes are dead code (placed after `jmp rax` / `br x9`).
+without any runtime overhead, the barrier bytes are dead code (placed after `jmp rax` / `br x9`).
 #### Usage
 The following JVM arguments are **required** to run Nalim: `-XX:+UnlockExperimentalVMOptions -XX:+EnableJVMCI`
+If using Java 26+, add `-XX:-UseCodeCacheFlushing` as well.
 
 ### Membrane
 Membrane works similar to Nalim, though may not be as affective as Nalim (benchmarks soon). It is an **experimental** backend and is not recommended to be used in production.
 Like Nalim, it used to require Java 20 and below, but thanks to an included [patched Membrane jar by QPCrummer](https://github.com/QPCrummer/MembraneFFI),
-it works great in all Minecraft versions using Java 21 and 25!
+it works great in all Minecraft versions using Java 21+!
 #### Usage
 The following JVM arguments are **required** to run Membrane: `-XX:+UnlockExperimentalVMOptions -XX:+EnableJVMCI`
 The following JVM argument is **recommended**, but not required yet: `-XX:+EnableDynamicAgentLoading`
