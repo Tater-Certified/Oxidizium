@@ -4,6 +4,7 @@ import org.openjdk.jmh.annotations.*;
 
 import java.util.concurrent.TimeUnit;
 
+// TODO See if this is necessary
 @Warmup(iterations = 1, time = 1, timeUnit = TimeUnit.SECONDS)
 @Measurement(iterations = 1, time = NativeTest.BENCHMARK_ITERATIONS_TIME_S, timeUnit = TimeUnit.SECONDS)
 @OutputTimeUnit(TimeUnit.MICROSECONDS)

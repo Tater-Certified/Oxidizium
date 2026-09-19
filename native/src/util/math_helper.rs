@@ -751,13 +751,26 @@ pub extern "C" fn catmull_rom(delta: f32, p0: f32, p1: f32, p2: f32, p3: f32) ->
 
 /// Fades a value using Perlin
 #[no_mangle]
-pub extern "C" fn perlin_fade(value: f64) -> f64 {
+pub extern "C" fn perlin_fade_double(value: f64) -> f64 {
     value * value * value * (value * (value * 6.0 - 15.0) + 10.0)
+}
+
+/// Fades a value using Perlin
+#[no_mangle]
+pub extern "C" fn perlin_fade_float(value: f32) -> f32 {
+    value * value * value * (value * (value * 6.0 - 15.0) + 10.0)
+}
+
+
+/// Derivative of the Perlin Fade function
+#[no_mangle]
+pub extern "C" fn perlin_fade_derivative_double(value: f64) -> f64 {
+    30.0 * value * value * (value - 1.0) * (value - 1.0)
 }
 
 /// Derivative of the Perlin Fade function
 #[no_mangle]
-pub extern "C" fn perlin_fade_derivative(value: f64) -> f64 {
+pub extern "C" fn perlin_fade_derivative_float(value: f32) -> f32 {
     30.0 * value * value * (value - 1.0) * (value - 1.0)
 }
 

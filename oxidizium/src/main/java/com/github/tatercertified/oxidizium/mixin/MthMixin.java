@@ -749,9 +749,20 @@ public class MthMixin {
      * @reason Implement in Rust
      */
     // @Config(name = "perlin fade")
+    @IfMinecraftVersion(maxVersion = "26.2")
     @Overwrite
     public static double smoothstep(double value) {
-        return NATIVE.perlin_fade(value);
+        return NATIVE.perlin_fade_double(value);
+    }
+
+    /**
+     * @author QPCrummer
+     * @reason Implement in Rust
+     */
+    @IfMinecraftVersion(minVersion = "26.3")
+    @Overwrite
+    public static float smoothstep(final float x) {
+        return NATIVE.perlin_fade_float(x);
     }
 
     /**
@@ -759,10 +770,20 @@ public class MthMixin {
      * @reason Implement in Rust
      */
     // @Config(name = "perlin fade derive")
-    @IfMinecraftVersion(minVersion = "1.17")
+    @IfMinecraftVersion(minVersion = "1.17", maxVersion = "26.2")
     @Overwrite
     public static double smoothstepDerivative(double value) {
-        return NATIVE.perlin_fade_derivative(value);
+        return NATIVE.perlin_fade_derivative_double(value);
+    }
+
+    /**
+     * @author QPCrummer
+     * @reason Implement in Rust
+     */
+    @IfMinecraftVersion(minVersion = "26.3")
+    @Overwrite
+    public static float smoothstepDerivative(final float x) {
+        return NATIVE.perlin_fade_derivative_float(x);
     }
 
     /**

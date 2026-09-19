@@ -578,24 +578,6 @@ public float native_catmullrom() {
 }
 
 @Benchmark
-public double smoothstep() {
-    return Mth.smoothstep(100.5);
-}
-@Benchmark
-public double native_smoothstep() {
-    return NATIVE.perlin_fade(100.5);
-}
-
-@Benchmark
-public double smoothstepDerivative() {
-    return Mth.smoothstepDerivative(100.5);
-}
-@Benchmark
-public double native_smoothstepDerivative() {
-    return NATIVE.perlin_fade_derivative(100.5);
-}
-
-@Benchmark
 public int sign() {
     return Mth.sign(100.5);
 }
