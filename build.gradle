@@ -337,7 +337,13 @@ tasks.register("generateNativeHooks") {
         nalimInterfaceClass.createNewFile()
     }
     def nalimInterfaceClassWriter = nalimInterfaceClass.newWriter(true)
-    nalimInterfaceClassWriter.writeLine("package com.github.tatercertified.nalim;\nimport com.github.tatercertified.oxidizium.utils.annotation.*;\nimport one.nalim.Link;\nimport one.nalim.Linker;\npublic class OxidiziumLib {\nstatic {String soPath = System.getProperty(\"oxidizium.native.path\");\nif (soPath != null) {Linker.loadLibrary(soPath);}\nLinker.linkClass(OxidiziumLib.class);}\n")
+    nalimInterfaceClassWriter.writeLine("""package com.github.tatercertified.nalim;
+import com.github.tatercertified.oxidizium.utils.annotation.*;
+import java.lang.invoke.MethodHandle;
+import one.nalim.Link;
+public class OxidiziumLib {
+    private static final MethodHandle ABS_INT = NalimBindings.link();
+""")
 
     def membraneInterfaceClass = new File("membrane/src/main/java/com/github/tatercertified/membrane/OxidiziumLib.java")
     membraneInterfaceClass.delete()
@@ -451,8 +457,25 @@ tasks.register("generateNativeHooks") {
                         String paramsJoined = parsedParams.join(', ')
                         interfaceClassWriter.writeLine("${javaReturnType} ${functionName}(${paramsJoined});")
 
-                        String nalimMethod = "\n@Link\npublic static native ${javaReturnType} ${functionName}(${paramsJoined});"
-                        nalimInterfaceClassWriter.writeLine(nalimMethod)
+                        String arguments = parameterNames.join(', ')
+                        if (javaReturnType in ['boolean', 'byte', 'short']) {
+                            // Nalim cannot bind narrow native returns on AArch64. The Rust
+                            // attribute exports an i32 bridge without changing the other backends.
+                            if (!fullSignature.contains('#[nalim_wide_return]')) {
+                                throw new GradleException("${functionName} needs #[nalim_wide_return] for Nalim")
+                            }
+                            String call = "nalim_${functionName}(${arguments})"
+                            String result = javaReturnType == 'boolean' ? "${call} != 0" : "(${javaReturnType}) ${call}"
+                            nalimInterfaceClassWriter.writeLine("""
+@Link private static native int nalim_${functionName}(${paramsJoined});
+public static ${javaReturnType} ${functionName}(${paramsJoined}) { return ${result}; }""")
+                        } else if (functionName == 'abs_int') {
+                            nalimInterfaceClassWriter.writeLine("""
+@Link(name = "abs_int") static native int nativeAbs(${paramsJoined});
+public static int abs_int(${paramsJoined}) { return NalimBindings.absInt(ABS_INT, ${arguments}); }""")
+                        } else {
+                            nalimInterfaceClassWriter.writeLine("\n@Link\npublic static native ${javaReturnType} ${functionName}(${paramsJoined});")
+                        }
 
                         String membraneMethod = "\n@Link(\"${functionName}\")\npublic static native ${javaReturnType} ${functionName}(${paramsJoined});"
                         membraneInterfaceClassWriter.writeLine(membraneMethod)

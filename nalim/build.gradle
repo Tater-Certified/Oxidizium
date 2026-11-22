@@ -16,8 +16,7 @@ repositories {
 
 dependencies {
     implementation include(project(":oxidizium"))
-    // JiJ nalim.jar
-    implementation include(":nalim:@jar")
+    implementation include(":nalim:${project.nalim_version}@jar")
 }
 
 def targetJavaVersion = 17
@@ -36,6 +35,7 @@ processResources {
     inputs.property "version", project.version
     inputs.property "minecraft_version", project.minecraft_version
     inputs.property "loader_version", project.loader_version
+    inputs.property "nalim_version", project.nalim_version
     inputs.property "modid", project.modid
     inputs.property "mod", project.mod
     inputs.property "java_ver", project.java_ver
@@ -45,6 +45,7 @@ processResources {
         expand "version": project.version,
                 "minecraft_version": project.minecraft_version,
                 "loader_version": project.loader_version,
+                "nalim_version": project.nalim_version,
                 "modid": project.modid,
                 "mod": project.mod,
                 "java_ver": project.java_ver
@@ -63,7 +64,11 @@ java {
 }
 
 jar {
-    from("LICENSE") {
-        rename { "${it}_${project.archives_base_name}" }
+    from(rootProject.file("LICENSE.txt")) {
+        rename { "LICENSE-Oxidizium-MIT.txt" }
     }
+    from("LICENSE.txt") {
+        rename { "LICENSE-Oxidizium-Nalim-GPLv3.txt" }
+    }
+    from("libs/LICENSE-Nalim.txt")
 }
