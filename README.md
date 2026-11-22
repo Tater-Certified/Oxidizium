@@ -34,15 +34,30 @@ best performance, however be warned that it is possible (though very unlikely) t
 distribution such as [Temurin](https://adoptium.net/) if you want to be completely safe.
 
 ### Nalim
-Nalim is a 3rd-party library that enables near-native latency when executing native code. It is roughly 3x faster than
-Project Panama for leaf (quick) calls and was ~50x faster vs pre-FFM Panama on JDK 19, per the [Nalim README](https://github.com/apangin/nalim#performance).
+The Nalim backend uses HotSpot's JVM Compiler Interface (JVMCI) to call Oxidizium's Rust functions.
+It bundles [Nalim v2](https://github.com/FurryMileon/nalim/tree/84fb642e623218f05c2a04439d5153439e906cef)
+(`1.2.5-patched-autoinline`). The vendored [`nalim/libs/nalim.jar`](nalim/libs/nalim.jar) is the
+[JAR from that commit](https://github.com/FurryMileon/nalim/blob/84fb642e623218f05c2a04439d5153439e906cef/nalim.jar);
+its SHA-256 is `22de70a9b7d9c56c16af6d2c5c269f1643858793b9530ca47fc25d252d4489b9`.
+On Linux x86-64, the backend asks Nalim to recognize the compiled `abs_int` function once.
+If it finds an exact match, HotSpot can inline it into the Java caller. On other supported
+platforms or when the compiled code doesn't match, it calls the original Rust function.
 
-Nalim historically broke on Java 21+ because Loom [JEP 444](https://openjdk.org/jeps/444) made the JVMCI nmethod entry barrier mandatory for every GC.
-Oxidizium ships a [Nalim jar patched by FurryMileon](https://github.com/FurryMileon/nalim) that emits a "no-op" barrier sequence after the tail-call so JVMCI validation passes
-without any runtime overhead, the barrier bytes are dead code (placed after `jmp rax` / `br x9`).
 #### Usage
-The following JVM arguments are **required** to run Nalim: `-XX:+UnlockExperimentalVMOptions -XX:+EnableJVMCI`
-If using Java 26+, add `-XX:-UseCodeCacheFlushing` as well.
+For Minecraft 26.3, use **HotSpot JDK 25** and install only the `oxidizium-nalim` variant.
+You do not need a separate Nalim mod or `-javaagent`. Add these JVM arguments to your launcher
+or server startup command (before `-jar`):
+
+```text
+--add-modules=jdk.internal.vm.ci --add-opens=java.base/java.lang=ALL-UNNAMED --enable-native-access=ALL-UNNAMED
+```
+
+On HotSpot JDK 26, also add `-XX:-UseCodeCacheFlushing` so the JVM does not discard idle native bindings.
+[Stock JDK 27 removed JVMCI](https://bugs.openjdk.org/browse/JDK-8385142); use JDK 25 or switch to the Panama variant.
+
+Nalim supports Linux and macOS on x86-64 and AArch64, and Windows on x86-64.
+Windows on Arm is unsupported by Nalim. To switch backends, replace `oxidizium-nalim` with
+`oxidizium-panama` or `oxidizium-membrane` and follow that backend's requirements.
 
 ### Membrane
 Membrane works similar to Nalim, though may not be as affective as Nalim (benchmarks soon). It is an **experimental** backend and is not recommended to be used in production.
@@ -85,4 +100,7 @@ To run the `Oxidizium` mod, use `gradlew :oxidizium:runClient` or `gradlew :oxid
 To run the `Oxidizium-Test` mod, use `gradlew :testMod:runClient`. This will automatically enable the testing GUI
 
 # Licensing
-This project is licensed under MIT; however, the Nalim jar is licensed under GPLv3 to be in compliance with the original codebase.
+The Nalim backend JAR ships Oxidizium's [MIT notice](LICENSE.txt), the
+[GPLv3 notice from the `nalim/` directory](nalim/LICENSE.txt), and the bundled Nalim
+library's [GPL-2.0-or-later notice](nalim/libs/LICENSE-Nalim.txt). The source and JAR
+for that library are linked [above](#nalim).

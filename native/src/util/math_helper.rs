@@ -1,4 +1,4 @@
-use oxidizium_macros::validate_params;
+use oxidizium_macros::{nalim_wide_return, validate_params};
 use std::ffi::c_ushort;
 use std::num::Wrapping;
 use std::slice;
@@ -240,12 +240,14 @@ pub extern "C" fn floor_div(dividend: i32, #[nonzero] divisor: i32) -> i32 {
 
 /// If the values are equal excluding floating point errors
 #[no_mangle]
+#[nalim_wide_return]
 pub extern "C" fn approximately_equals_float(a: f32, b: f32) -> bool {
     (b - a).abs() < APPROXIMATION_THRESHOLD_F32
 }
 
 /// If the values are equal excluding floating point errors
 #[no_mangle]
+#[nalim_wide_return]
 pub extern "C" fn approximately_equals_double(a: f64, b: f64) -> bool {
     (b - a).abs() < APPROXIMATION_THRESHOLD_F64
 }
@@ -279,12 +281,14 @@ pub extern "C" fn floor_mod_double(dividend: f64, #[nonzero] divisor: f64) -> f6
 /// If a is a multiple of b
 #[no_mangle]
 #[validate_params]
+#[nalim_wide_return]
 pub extern "C" fn is_multiple_of(a: i32, #[nonzero] b: i32) -> bool {
     a % b == 0
 }
 
 /// Compacts degrees into a single byte
 #[no_mangle]
+#[nalim_wide_return]
 pub extern "C" fn pack_degrees(degrees: f32) -> i8 {
     floor_float(degrees * PACK) as i8
 }
@@ -448,6 +452,7 @@ pub extern "C" fn smallest_encompassing_square_side_length(#[positive_only] valu
 
 /// Returns if the value is a power of two
 #[no_mangle]
+#[nalim_wide_return]
 pub extern "C" fn is_power_of_two(value: i32) -> bool {
     value != 0 && (value & (value - 1)) == 0
 }
@@ -993,6 +998,7 @@ pub extern "C" fn wrap_degrees_90(angle: f32) -> f32 {
 
 /// Checks if the value is a power of 2
 #[no_mangle]
+#[nalim_wide_return]
 pub extern "C" fn is_power_of_2(value: i64) -> bool {
     value > 0 && (value & (value - 1)) == 0
 }
